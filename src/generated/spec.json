@@ -1,0 +1,170 @@
+{
+  "root": "ChatReply",
+  "components": {
+    "ChatReply": {
+      "signature": "ChatReply(blocks: (Paragraph | ReportSummary | DataTable)[])",
+      "description": "Root of every reply: a list of Paragraph, ReportSummary and DataTable blocks."
+    },
+    "Paragraph": {
+      "signature": "Paragraph(text: string)",
+      "description": "A short paragraph of plain text."
+    },
+    "ReportSummary": {
+      "signature": "ReportSummary(title: string, points: string[])",
+      "description": "A titled summary with a short list of key points. Use for summaries, status reports and suggestions."
+    },
+    "DataTable": {
+      "signature": "DataTable(title: string, columns: string[], rows: Row[])",
+      "description": "A small table of Row entries. Provide column names first."
+    },
+    "Row": {
+      "signature": "Row(cells: string[])",
+      "description": "One table row; cells are plain text in column order."
+    }
+  },
+  "schema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "properties": {
+      "ChatReply": {
+        "$ref": "#/$defs/ChatReply"
+      },
+      "Paragraph": {
+        "$ref": "#/$defs/Paragraph"
+      },
+      "ReportSummary": {
+        "$ref": "#/$defs/ReportSummary"
+      },
+      "DataTable": {
+        "$ref": "#/$defs/DataTable"
+      },
+      "Row": {
+        "$ref": "#/$defs/Row"
+      }
+    },
+    "required": [
+      "ChatReply",
+      "Paragraph",
+      "ReportSummary",
+      "DataTable",
+      "Row"
+    ],
+    "additionalProperties": false,
+    "$defs": {
+      "ChatReply": {
+        "type": "object",
+        "properties": {
+          "blocks": {
+            "type": "array",
+            "items": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/Paragraph"
+                },
+                {
+                  "$ref": "#/$defs/ReportSummary"
+                },
+                {
+                  "$ref": "#/$defs/DataTable"
+                }
+              ]
+            }
+          }
+        },
+        "required": [
+          "blocks"
+        ],
+        "additionalProperties": false,
+        "description": "Root of every reply: a list of Paragraph, ReportSummary and DataTable blocks."
+      },
+      "Paragraph": {
+        "type": "object",
+        "properties": {
+          "text": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "text"
+        ],
+        "additionalProperties": false,
+        "description": "A short paragraph of plain text."
+      },
+      "ReportSummary": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "points": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "title",
+          "points"
+        ],
+        "additionalProperties": false,
+        "description": "A titled summary with a short list of key points. Use for summaries, status reports and suggestions."
+      },
+      "DataTable": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "columns": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "rows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/Row"
+            }
+          }
+        },
+        "required": [
+          "title",
+          "columns",
+          "rows"
+        ],
+        "additionalProperties": false,
+        "description": "A small table of Row entries. Provide column names first."
+      },
+      "Row": {
+        "type": "object",
+        "properties": {
+          "cells": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "cells"
+        ],
+        "additionalProperties": false,
+        "description": "One table row; cells are plain text in column order."
+      }
+    }
+  },
+  "id": "atlas-assistant",
+  "promptOptions": {
+    "preamble": "You are Atlas, a concise, friendly workplace assistant in a demo with fictional data. Answer in a few short sentences. Use ReportSummary for lists of key points and DataTable for small tables when that helps.",
+    "additionalRules": [
+      "Use only the provided components and start with root = ChatReply([...]).",
+      "Never claim you used a tool, sent a message, or accessed a record. You have no tools in this mode.",
+      "Do not invent real people, companies, credentials, or figures."
+    ],
+    "examples": [
+      "root = ChatReply([intro, tips])\nintro = Paragraph(\"Here are a few quick tips.\")\ntips = ReportSummary(\"Quick tips\", [\"Keep notes short\", \"Write down next steps\"])"
+    ]
+  }
+}

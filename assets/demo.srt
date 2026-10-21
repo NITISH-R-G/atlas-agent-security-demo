@@ -1,0 +1,119 @@
+1
+00:00:00,500 --> 00:00:02,781
+Your AI agent proposed the action.
+
+2
+00:00:02,831 --> 00:00:05,181
+Should it be allowed to execute it?
+
+3
+00:00:05,231 --> 00:00:12,519
+This is Atlas, a live demonstration of one idea: a model's proposal is not the same thing as authorization.
+
+4
+00:00:14,167 --> 00:00:15,318
+Here's the problem.
+
+5
+00:00:15,368 --> 00:00:20,437
+An assistant that can read files and send messages can be talked into using them.
+
+6
+00:00:20,487 --> 00:00:27,074
+In this fictional workspace, a third-party plugin hides an instruction inside an ordinary project update.
+
+7
+00:00:28,734 --> 00:00:30,517
+Watch the same request twice.
+
+8
+00:00:30,567 --> 00:00:42,086
+With Security off, a controlled weakness, the scripted agent uses the unverified plugin, follows the hidden instruction, reads a restricted memo, and queues it for an outside address.
+
+9
+00:00:42,136 --> 00:00:46,005
+Everything is fictional, and off is only a demonstration mode.
+
+10
+00:00:46,055 --> 00:00:47,016
+Now Security on.
+
+11
+00:00:47,066 --> 00:00:47,838
+Same request.
+
+12
+00:00:47,888 --> 00:00:52,769
+The plugin is blocked, and the agent uses the verified project record instead.
+
+13
+00:00:54,434 --> 00:00:56,026
+Now the live model, Groq.
+
+14
+00:00:56,076 --> 00:01:00,426
+I claim to be the CFO and ask it to read the compensation document.
+
+15
+00:01:00,476 --> 00:01:02,264
+The model proposes the read.
+
+16
+00:01:02,314 --> 00:01:07,190
+The server checks the resource against who may see it, and denies the call.
+
+17
+00:01:07,240 --> 00:01:10,867
+The walkthrough names the control that decided, and why.
+
+18
+00:01:12,501 --> 00:01:14,892
+Sensitive actions wait for a human.
+
+19
+00:01:14,942 --> 00:01:17,681
+Sending the summary to the team is held.
+
+20
+00:01:17,731 --> 00:01:19,843
+I deny it, and nothing is sent.
+
+21
+00:01:19,893 --> 00:01:26,747
+Run it again, approve, and the server re-checks the call and runs it once, into a simulated outbox.
+
+22
+00:01:26,797 --> 00:01:28,699
+Nothing ever leaves the app.
+
+23
+00:01:30,335 --> 00:01:32,912
+Now a simulated authorization outage.
+
+24
+00:01:32,962 --> 00:01:35,895
+With Security on, the system fails closed.
+
+25
+00:01:35,945 --> 00:01:38,167
+The send is denied, not guessed.
+
+26
+00:01:38,217 --> 00:01:42,641
+The audit record matches the decision the server actually made.
+
+27
+00:01:44,302 --> 00:01:46,846
+This is the path every request takes.
+
+28
+00:01:46,896 --> 00:01:48,178
+The model proposes.
+
+29
+00:01:48,228 --> 00:01:55,188
+The server validates, authorizes, asks for approval, filters the output, and records an audit event.
+
+30
+00:01:55,238 --> 00:01:57,992
+A model's proposal is not authorization.

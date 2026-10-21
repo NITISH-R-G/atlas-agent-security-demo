@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Atlas</title>
+<style>
+  html,body{margin:0;height:100%;background:#0b1020;overflow:hidden}
+  body{font-family:"Segoe UI",Inter,system-ui,sans-serif;color:#fff;display:grid;place-items:center;
+    background:radial-gradient(1200px 700px at 70% 20%,rgba(79,140,255,.28),transparent 60%),radial-gradient(900px 600px at 15% 90%,rgba(40,200,190,.18),transparent 60%),#0b1020}
+  .wrap{max-width:980px;padding:0 48px}
+  .logo{width:72px;height:72px;border-radius:22px;display:grid;place-items:center;font-size:36px;font-weight:700;
+    background:linear-gradient(135deg,#3b6cff,#27c4d6);box-shadow:0 10px 40px rgba(60,110,255,.45);opacity:0;animation:in .7s .2s forwards}
+  h1{font-size:56px;line-height:1.12;letter-spacing:-.02em;font-weight:650;margin:34px 0 0;opacity:0;transform:translateY(14px);animation:up .8s 1s forwards}
+  h2{font-size:56px;line-height:1.12;letter-spacing:-.02em;font-weight:650;margin:10px 0 0;color:#8db4ff;opacity:0;transform:translateY(14px);animation:up .8s 3.2s forwards}
+  p{font-size:24px;color:#aab6d3;margin:40px 0 0;opacity:0;animation:in .8s 6.2s forwards}
+  p b{color:#fff}
+  @keyframes in{to{opacity:1}}
+  @keyframes up{to{opacity:1;transform:none}}
+  @media (prefers-reduced-motion: reduce){*{animation-duration:.01s!important}}
+</style></head>
+<body><div class="wrap">
+  <div class="logo" aria-hidden="true">A</div>
+  <h1>Your AI agent proposed the action.</h1>
+  <h2>Should it be allowed to execute it?</h2>
+  <p><b>Atlas</b> · a live demo of server-side enforcement for AI agents</p>
+</div></body></html>
