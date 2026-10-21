@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" width="1600" height="900" role="img" aria-label="Fail closed. If a required check cannot complete, the action does not run.">
+<title>Fail closed</title>
+<desc>If a required check cannot complete, the action does not run.</desc>
+<defs><marker id="arrow-neutral" viewBox="0 0 10 10" refX="8" refY="5" markerUnits="userSpaceOnUse" markerWidth="16" markerHeight="16" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#8b95ad"/></marker><marker id="arrow-model" viewBox="0 0 10 10" refX="8" refY="5" markerUnits="userSpaceOnUse" markerWidth="16" markerHeight="16" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#1b9ccf"/></marker><marker id="arrow-tool" viewBox="0 0 10 10" refX="8" refY="5" markerUnits="userSpaceOnUse" markerWidth="16" markerHeight="16" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#1b9ccf"/></marker><marker id="arrow-allow" viewBox="0 0 10 10" refX="8" refY="5" markerUnits="userSpaceOnUse" markerWidth="16" markerHeight="16" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#1f9d57"/></marker><marker id="arrow-deny" viewBox="0 0 10 10" refX="8" refY="5" markerUnits="userSpaceOnUse" markerWidth="16" markerHeight="16" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#d93a35"/></marker><marker id="arrow-pending" viewBox="0 0 10 10" refX="8" refY="5" markerUnits="userSpaceOnUse" markerWidth="16" markerHeight="16" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#d98a00"/></marker><marker id="arrow-server" viewBox="0 0 10 10" refX="8" refY="5" markerUnits="userSpaceOnUse" markerWidth="16" markerHeight="16" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#4a5be0"/></marker><marker id="arrow-muted" viewBox="0 0 10 10" refX="8" refY="5" markerUnits="userSpaceOnUse" markerWidth="16" markerHeight="16" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#c3c9d6"/></marker><style>
+  text{font-family:Inter,"Segoe UI",system-ui,sans-serif}
+  .bg{fill:#fbfcfe}
+  .h1{font-size:44px;font-weight:700;fill:#121a30;letter-spacing:-0.5px}
+  .h2{font-size:24px;fill:#5b6579}
+  .ttl{font-size:25px;font-weight:700}
+  .sub{font-size:19px}
+  .badge{font-size:15px;font-weight:700;letter-spacing:.8px}
+  .note{font-weight:600}
+  .boundary{fill:rgba(74,91,224,.045);stroke:#4a5be0;stroke-width:3;stroke-dasharray:14 10}
+  .blabel{font-size:17px;font-weight:700;letter-spacing:2px;fill:#3a49c8}
+  .edge{fill:none;stroke-width:3.5;stroke-linejoin:round}
+  .edge.dashed{stroke-dasharray:10 8}
+  .lbg{fill:#fbfcfe;stroke:#dfe3ec}
+  .elabel{font-size:17px;font-weight:600}
+</style></defs>
+<rect class="bg" width="1600" height="900"/>
+<text x="60" y="78" class="h1">Fail closed</text>
+<text x="60" y="118" class="h2">If a required check cannot complete, the action does not run.</text>
+<g data-id="proposal" data-step="1"><rect x="50" y="300" width="210" height="120" rx="16" fill="#e7f6fc" stroke="#1b9ccf" stroke-width="2.5"/><text x="68" y="334" class="ttl" fill="#0c4a66">Proposal</text><text x="68" y="362" class="sub" fill="#0c4a66">send_message</text><text x="68" y="387" class="sub" fill="#0c4a66">to the team</text></g>
+<g data-id="boundary" data-step="2"><rect x="330" y="190" width="1220" height="500" rx="26" class="boundary"/><text x="354" y="224" class="blabel">SERVER · TRUST BOUNDARY</text></g>
+<g data-id="engine" data-step="2"><rect x="360" y="300" width="220" height="120" rx="16" fill="#eef1ff" stroke="#4a5be0" stroke-width="2.5"/><text x="378" y="334" class="ttl" fill="#1e2a8c">Policy engine</text><text x="378" y="362" class="sub" fill="#1e2a8c">needs an authorization</text><text x="378" y="387" class="sub" fill="#1e2a8c">result to continue</text></g>
+<g data-id="authz" data-step="3"><rect x="690" y="300" width="230" height="120" rx="16" fill="#fdeceb" stroke="#d93a35" stroke-width="2.5"/><text x="708" y="334" class="ttl" fill="#7d1b18">Authz check</text><text x="708" y="362" class="sub" fill="#7d1b18">simulated outage</text></g>
+<g data-id="fc" data-step="4"><rect x="1030" y="300" width="210" height="120" rx="16" fill="#fdeceb" stroke="#d93a35" stroke-width="2.5"/><text x="1048" y="334" class="ttl" fill="#7d1b18">Fail closed</text><text x="1048" y="362" class="sub" fill="#7d1b18">cannot complete,</text><text x="1048" y="387" class="sub" fill="#7d1b18">so deny</text></g>
+<g data-id="stop" data-step="5"><rect x="1340" y="300" width="190" height="120" rx="16" fill="#fdeceb" stroke="#d93a35" stroke-width="2.5"/><text x="1358" y="334" class="ttl" fill="#7d1b18">Not executed</text><text x="1358" y="362" class="sub" fill="#7d1b18">nothing sent</text></g>
+<g data-id="tool" data-step="5"><rect x="1030" y="540" width="210" height="100" rx="16" fill="#f6f7f9" stroke="#c3c9d6" stroke-width="2.5"/><text x="1048" y="574" class="ttl" fill="#6b7385">Tool</text><text x="1048" y="602" class="sub" fill="#6b7385">never reached</text></g>
+<g data-id="audit" data-step="6"><rect x="360" y="540" width="560" height="110" rx="16" fill="#e6f6ec" stroke="#1f9d57" stroke-width="2.5"/><text x="378" y="574" class="ttl" fill="#0d5a31">Audit event</text><text x="378" y="602" class="sub" fill="#0d5a31">decision: denied, layer: fail closed</text></g>
+<g data-id="e1" data-step="2"><path d="M260 360 L360 360" pathLength="1" class="edge" stroke="#1b9ccf" marker-end="url(#arrow-model)"/></g>
+<g data-id="e2" data-step="3"><path d="M580 360 L690 360" pathLength="1" class="edge" stroke="#4a5be0" marker-end="url(#arrow-server)"/><rect x="602" y="320" width="66" height="32" rx="16" class="lbg"/><text x="635" y="342" class="elabel" text-anchor="middle" fill="#1e2a8c">asks</text></g>
+<g data-id="e3" data-step="4"><path d="M920 360 L1030 360" pathLength="1" class="edge" stroke="#d93a35" marker-end="url(#arrow-deny)"/><rect x="915.75" y="320" width="118.5" height="32" rx="16" class="lbg"/><text x="975" y="342" class="elabel" text-anchor="middle" fill="#7d1b18">no answer</text></g>
+<g data-id="e4" data-step="5"><path d="M1240 360 L1340 360" pathLength="1" class="edge" stroke="#d93a35" marker-end="url(#arrow-deny)"/></g>
+<g data-id="e5" data-step="5"><path d="M1135 420 L1135 540" pathLength="1" class="edge dashed" stroke="#c3c9d6" marker-end="url(#arrow-muted)"/></g>
+<g data-id="e6" data-step="6"><path d="M1135 420 L1135 480 L640 480 L640 540" pathLength="1" class="edge dashed" stroke="#1f9d57" marker-end="url(#arrow-allow)"/></g>
+<g data-id="n1" data-step="6"><text x="50" y="748" class="note" font-size="24" text-anchor="start" fill="#1e2a8c">A controlled, simulated failure. With Security OFF the same outage fails open: that is the defined weakness.</text></g>
+</svg>

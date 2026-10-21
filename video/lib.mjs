@@ -13,8 +13,8 @@ export const FF = ffmpegPath;
 export const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 const OVERLAY_CSS = `
-#atlas-cap{position:fixed;left:50%;bottom:34px;transform:translateX(-50%);max-width:1040px;z-index:2147483000;pointer-events:none;
-  background:rgba(12,16,28,.86);color:#fff;font:600 21px/1.35 Inter,system-ui,sans-serif;letter-spacing:-.005em;text-align:center;
+#atlas-cap{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);max-width:1080px;z-index:2147483000;pointer-events:none;
+  background:rgba(12,16,28,.86);color:#fff;font:600 22px/1.35 Inter,system-ui,sans-serif;letter-spacing:-.005em;text-align:center;
   padding:10px 22px;border-radius:14px;box-shadow:0 8px 30px rgba(0,0,0,.35);opacity:0;transition:opacity .25s}
 #atlas-cap.on{opacity:1}
 #atlas-tag{position:fixed;left:16px;top:230px;width:236px;white-space:normal;line-height:1.35!important;z-index:2147483000;pointer-events:none;
@@ -29,11 +29,14 @@ const OVERLAY_CSS = `
 .atlas-ring{position:fixed;z-index:2147482999;pointer-events:none;border-radius:14px;border:3px solid var(--c,#4f8cff);box-shadow:0 0 0 6px color-mix(in srgb,var(--c,#4f8cff) 22%,transparent);transition:all .35s cubic-bezier(.16,1,.3,1)}
 `;
 
-export async function openScene(browser, { url, init, width = 1280, height = 720, scale = 1.5, name }) {
+export async function openScene(browser, { url, html, init, width = 1280, height = 720, scale = 1.5, name }) {
   const ctx = await browser.newContext({ viewport: { width, height }, deviceScaleFactor: scale, colorScheme: "light", locale: "en-US" });
   const page = await ctx.newPage();
-  await page.goto(url, { waitUntil: "load" });
-  await page.waitForLoadState("networkidle");
+  if (html) await page.setContent(html, { waitUntil: "load" });
+  else {
+    await page.goto(url, { waitUntil: "domcontentloaded", timeout: 60000 });
+    await page.waitForLoadState("networkidle");
+  }
   await page.evaluate(() => document.fonts.ready);
   await page.addStyleTag({ content: OVERLAY_CSS });
   await page.evaluate(() => {

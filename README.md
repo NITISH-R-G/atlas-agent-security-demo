@@ -12,11 +12,11 @@ A ChatGPT-inspired agent interface for demonstrating what happens when AI action
 ![Tests](https://img.shields.io/badge/tests-355%20passing%20%C2%B7%2011%20live%20skipped-2ea44f?style=flat-square)
 ![Data](https://img.shields.io/badge/data-fictional-lightgrey?style=flat-square)
 
-**[Open the live demo](https://atlas-security-demo.vercel.app)** · **[Watch the 2-minute video](assets/demo.mp4)** · [Architecture](docs/ARCHITECTURE.md) · [Security model](docs/SECURITY.md) · [Presenter guide](docs/PRESENTER.md)
+**[Open the live demo](https://atlas-security-demo.vercel.app)** · **[Watch the 6-minute explainer](assets/demo.mp4)** · [Architecture](docs/ARCHITECTURE.md) · [Security model](docs/SECURITY.md) · [Presenter guide](docs/PRESENTER.md)
 
-<a href="assets/demo.mp4"><img src="assets/demo-poster.png" alt="Atlas demo video: scenario C holding a sensitive send for approval" width="900"></a>
+<a href="assets/demo.mp4"><img src="assets/video-thumbnail.png" alt="Atlas explainer video: a proposal is not permission" width="900"></a>
 
-<sub>Click the image to play the narrated demo (`assets/demo.mp4`, 1080p). Captions: <a href="assets/demo.srt">demo.srt</a>.</sub>
+<sub>Click the image to play the narrated explainer (`assets/demo.mp4`, 5:56, 1080p, captions burned in; also <a href="assets/demo.srt">demo.srt</a>). Real application footage alternates with diagrams drawn step by step.</sub>
 
 </div>
 
@@ -82,21 +82,18 @@ More: [architecture view](assets/screenshots/desktop-architecture.png) · [mobil
 
 ## Architecture
 
-```mermaid
-flowchart LR
-  U[You] --> UI[Atlas UI] --> R[Route: session, limits]
-  R --> P{Who proposes}
-  P -->|scripted| S[Scripted planner]
-  P -->|live| G[Groq model]
-  S --> X
-  G --> X
-  X[Server policy pipeline] -->|allow| T[Tool on synthetic data] --> A[(Audit)]
-  X -->|deny| A
-  X -->|needs approval| H[Held until you decide] --> X
-  X -->|check cannot complete| F[Fail closed] --> A
-```
+<img src="assets/reference/architecture-overview.png" alt="Atlas system architecture: UI, route handlers, planners, policy pipeline, tools, approvals and audit inside the server trust boundary" width="900">
 
-The model is never the security boundary. Details: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
+The model is never the security boundary. Everything inside the dashed line is trusted server code; only the Groq call leaves it. More views, each teaching one idea (editable SVG sources in [docs/architecture](docs/architecture)):
+
+| | |
+|---|---|
+| [Request and policy lifecycle](assets/reference/request-lifecycle.png) | one tool call from request to recorded outcome |
+| [Approval lifecycle](assets/reference/approval-lifecycle.png) | parked, sealed ticket, decision, validation, outcome |
+| [Security OFF versus ON](assets/reference/security-mode-comparison.png) | the same scripted request, two outcomes |
+| [Fail closed](assets/reference/fail-closed-flow.png) | a check that cannot complete stops the action |
+
+Details and what each diagram confirms: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 ## Security controls
 
@@ -147,10 +144,11 @@ At the last run: **355 passed, 11 skipped** (the skipped tests are the live-prov
 - On the serverless deployment, approvals travel as signed session-bound tickets, but single use, audit records and rate limits are per instance. A replayed ticket can repeat a *simulated* send. A shared store would fix this and has not been added.
 - Educational demo on fictional data. It is not a production security service and has not been penetration tested.
 
-## Video and docs
+## Video, diagrams and docs
 
-- [Demo video](assets/demo.mp4) · [captions](assets/demo.srt) · [script and timeline](docs/demo-script.md) (the pipeline in [`video/`](video) reproduces it; narration by ElevenLabs, free plan)
-- [Architecture](docs/ARCHITECTURE.md) · [Security model](docs/SECURITY.md) · [Presenter guide](docs/PRESENTER.md) · [Deploying](docs/DEPLOY.md) · [Reference analysis](docs/REFERENCE-ANALYSIS.md)
+- [Explainer video](assets/demo.mp4) (5:56) · [captions](assets/demo.srt) · [production guide: narration, timeline, how to rebuild](docs/VIDEO_PRODUCTION.md) (the pipeline in [`video/`](video); narration by ElevenLabs, free plan)
+- [Architecture](docs/ARCHITECTURE.md) · [diagram sources and exports](docs/architecture) · [reference images](assets/reference) · [presentation context](docs/PRESENTATION_CONTEXT.md)
+- [Security model](docs/SECURITY.md) · [Presenter guide](docs/PRESENTER.md) · [Deploying](docs/DEPLOY.md) · [Reference analysis](docs/REFERENCE-ANALYSIS.md)
 
 ## Development
 

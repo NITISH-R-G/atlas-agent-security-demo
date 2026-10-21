@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" width="1600" height="900" role="img" aria-label="Atlas system architecture. The model proposes. Server-side code decides, executes and records.">
+<title>Atlas system architecture</title>
+<desc>The model proposes. Server-side code decides, executes and records.</desc>
+<defs><marker id="arrow-neutral" viewBox="0 0 10 10" refX="8" refY="5" markerUnits="userSpaceOnUse" markerWidth="16" markerHeight="16" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#8b95ad"/></marker><marker id="arrow-model" viewBox="0 0 10 10" refX="8" refY="5" markerUnits="userSpaceOnUse" markerWidth="16" markerHeight="16" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#1b9ccf"/></marker><marker id="arrow-tool" viewBox="0 0 10 10" refX="8" refY="5" markerUnits="userSpaceOnUse" markerWidth="16" markerHeight="16" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#1b9ccf"/></marker><marker id="arrow-allow" viewBox="0 0 10 10" refX="8" refY="5" markerUnits="userSpaceOnUse" markerWidth="16" markerHeight="16" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#1f9d57"/></marker><marker id="arrow-deny" viewBox="0 0 10 10" refX="8" refY="5" markerUnits="userSpaceOnUse" markerWidth="16" markerHeight="16" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#d93a35"/></marker><marker id="arrow-pending" viewBox="0 0 10 10" refX="8" refY="5" markerUnits="userSpaceOnUse" markerWidth="16" markerHeight="16" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#d98a00"/></marker><marker id="arrow-server" viewBox="0 0 10 10" refX="8" refY="5" markerUnits="userSpaceOnUse" markerWidth="16" markerHeight="16" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#4a5be0"/></marker><marker id="arrow-muted" viewBox="0 0 10 10" refX="8" refY="5" markerUnits="userSpaceOnUse" markerWidth="16" markerHeight="16" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#c3c9d6"/></marker><style>
+  text{font-family:Inter,"Segoe UI",system-ui,sans-serif}
+  .bg{fill:#fbfcfe}
+  .h1{font-size:44px;font-weight:700;fill:#121a30;letter-spacing:-0.5px}
+  .h2{font-size:24px;fill:#5b6579}
+  .ttl{font-size:25px;font-weight:700}
+  .sub{font-size:19px}
+  .badge{font-size:15px;font-weight:700;letter-spacing:.8px}
+  .note{font-weight:600}
+  .boundary{fill:rgba(74,91,224,.045);stroke:#4a5be0;stroke-width:3;stroke-dasharray:14 10}
+  .blabel{font-size:17px;font-weight:700;letter-spacing:2px;fill:#3a49c8}
+  .edge{fill:none;stroke-width:3.5;stroke-linejoin:round}
+  .edge.dashed{stroke-dasharray:10 8}
+  .lbg{fill:#fbfcfe;stroke:#dfe3ec}
+  .elabel{font-size:17px;font-weight:600}
+</style></defs>
+<rect class="bg" width="1600" height="900"/>
+<text x="60" y="78" class="h1">Atlas system architecture</text>
+<text x="60" y="118" class="h2">The model proposes. Server-side code decides, executes and records.</text>
+<g data-id="user" data-step="1"><rect x="50" y="380" width="190" height="120" rx="16" fill="#f3f5fa" stroke="#8b95ad" stroke-width="2.5"/><text x="68" y="414" class="ttl" fill="#1b2338">You</text><text x="68" y="442" class="sub" fill="#1b2338">Chat, Explore</text><text x="68" y="467" class="sub" fill="#1b2338">Security, evidence</text></g>
+<g data-id="groq" data-step="3"><rect x="680" y="140" width="240" height="70" rx="16" fill="#e7f6fc" stroke="#1b9ccf" stroke-width="2.5"/><text x="698" y="174" class="ttl" fill="#0c4a66">Groq API</text><text x="698" y="202" class="sub" fill="#0c4a66">external model</text></g>
+<g data-id="boundary" data-step="2"><rect x="320" y="235" width="1240" height="510" rx="26" class="boundary"/><text x="344" y="269" class="blabel">SERVER · TRUST BOUNDARY</text></g>
+<g data-id="route" data-step="2"><rect x="350" y="370" width="230" height="140" rx="16" fill="#eef1ff" stroke="#4a5be0" stroke-width="2.5"/><text x="368" y="404" class="ttl" fill="#1e2a8c">Route handlers</text><text x="368" y="432" class="sub" fill="#1e2a8c">/api/chat, /api/approve</text><text x="368" y="457" class="sub" fill="#1e2a8c">session cookie, limits</text></g>
+<g data-id="adapter" data-step="3"><rect x="680" y="275" width="240" height="80" rx="16" fill="#e7f6fc" stroke="#1b9ccf" stroke-width="2.5"/><text x="698" y="309" class="ttl" fill="#0c4a66">Model adapter</text><text x="698" y="337" class="sub" fill="#0c4a66">live replies</text></g>
+<g data-id="scripted" data-step="3"><rect x="680" y="385" width="240" height="80" rx="16" fill="#f3f5fa" stroke="#8b95ad" stroke-width="2.5"/><text x="698" y="419" class="ttl" fill="#1b2338">Scripted planner</text><text x="698" y="447" class="sub" fill="#1b2338">no model</text></g>
+<g data-id="builtin" data-step="3"><rect x="680" y="495" width="240" height="80" rx="16" fill="#f3f5fa" stroke="#8b95ad" stroke-width="2.5"/><text x="698" y="529" class="ttl" fill="#1b2338">Built-in assistant</text><text x="698" y="557" class="sub" fill="#1b2338">no model</text></g>
+<g data-id="pipeline" data-step="4"><rect x="1010" y="300" width="270" height="270" rx="16" fill="#eef1ff" stroke="#4a5be0" stroke-width="2.5"/><text x="1028" y="334" class="ttl" fill="#1e2a8c">Policy pipeline</text><text x="1028" y="362" class="sub" fill="#1e2a8c">executeTool</text><text x="1028" y="387" class="sub" fill="#1e2a8c">validate arguments</text><text x="1028" y="412" class="sub" fill="#1e2a8c">trust, allowlist, identity</text><text x="1028" y="437" class="sub" fill="#1e2a8c">credentials, resource</text><text x="1028" y="462" class="sub" fill="#1e2a8c">approval gate, filter</text></g>
+<g data-id="tools" data-step="5"><rect x="1340" y="280" width="190" height="110" rx="16" fill="#e7f6fc" stroke="#1b9ccf" stroke-width="2.5"/><text x="1358" y="314" class="ttl" fill="#0c4a66">Tools</text><text x="1358" y="342" class="sub" fill="#0c4a66">7, synthetic data</text></g>
+<g data-id="data" data-step="5"><rect x="1340" y="420" width="190" height="90" rx="16" fill="#f3f5fa" stroke="#8b95ad" stroke-width="2.5"/><text x="1358" y="454" class="ttl" fill="#1b2338">Resources</text><text x="1358" y="482" class="sub" fill="#1b2338">fictional, in memory</text></g>
+<g data-id="audit" data-step="6"><rect x="1340" y="560" width="190" height="120" rx="16" fill="#e6f6ec" stroke="#1f9d57" stroke-width="2.5"/><text x="1358" y="594" class="ttl" fill="#0d5a31">Audit log</text><text x="1358" y="622" class="sub" fill="#0d5a31">one record per</text><text x="1358" y="647" class="sub" fill="#0d5a31">decision, in memory</text></g>
+<g data-id="approvals" data-step="5"><rect x="1010" y="625" width="270" height="90" rx="16" fill="#fff4dc" stroke="#d98a00" stroke-width="2.5"/><text x="1028" y="659" class="ttl" fill="#6d4600">Approval store</text><text x="1028" y="687" class="sub" fill="#6d4600">parked calls, sealed tickets</text></g>
+<g data-id="e1" data-step="2"><path d="M240 440 L350 440" pathLength="1" class="edge" stroke="#8b95ad" marker-end="url(#arrow-neutral)"/><rect x="246.25" y="398" width="97.5" height="32" rx="16" class="lbg"/><text x="295" y="420" class="elabel" text-anchor="middle" fill="#1b2338">request</text></g>
+<g data-id="e2" data-step="3"><path d="M580 440 L630 440 L630 315 L680 315" pathLength="1" class="edge" stroke="#8b95ad" marker-end="url(#arrow-neutral)"/></g>
+<g data-id="e3" data-step="3"><path d="M580 440 L630 440 L630 425 L680 425" pathLength="1" class="edge" stroke="#8b95ad" marker-end="url(#arrow-neutral)"/></g>
+<g data-id="e4" data-step="3"><path d="M580 440 L630 440 L630 535 L680 535" pathLength="1" class="edge" stroke="#8b95ad" marker-end="url(#arrow-neutral)"/></g>
+<g data-id="e5" data-step="3"><path d="M800 275 L800 210" pathLength="1" class="edge dashed" stroke="#1b9ccf" marker-end="url(#arrow-model)"/></g>
+<g data-id="e6" data-step="4"><path d="M920 315 L965 315 L965 435 L1010 435" pathLength="1" class="edge" stroke="#4a5be0" marker-end="url(#arrow-server)"/></g>
+<g data-id="e7" data-step="4"><path d="M920 425 L965 425 L965 435 L1010 435" pathLength="1" class="edge" stroke="#4a5be0" marker-end="url(#arrow-server)"/></g>
+<g data-id="e8" data-step="4"><path d="M920 535 L965 535 L965 435 L1010 435" pathLength="1" class="edge" stroke="#4a5be0" marker-end="url(#arrow-server)"/></g>
+<g data-id="e9" data-step="5"><path d="M1280 435 L1310 435 L1310 335 L1340 335" pathLength="1" class="edge" stroke="#1f9d57" marker-end="url(#arrow-allow)"/></g>
+<g data-id="e10" data-step="5"><path d="M1435 390 L1435 420" pathLength="1" class="edge" stroke="#1b9ccf" marker-end="url(#arrow-tool)"/></g>
+<g data-id="e11" data-step="5"><path d="M1145 570 L1145 625" pathLength="1" class="edge" stroke="#d98a00" marker-end="url(#arrow-pending)"/></g>
+<g data-id="e12" data-step="6"><path d="M1280 435 L1310 435 L1310 620 L1340 620" pathLength="1" class="edge dashed" stroke="#1f9d57" marker-end="url(#arrow-allow)"/></g>
+<g data-id="cap" data-step="4"><text x="50" y="600" class="note" font-size="20" text-anchor="start" fill="#1e2a8c">Inside the dashed line:</text><text x="50" y="628" class="note" font-size="20" text-anchor="start" fill="#1e2a8c">trusted server code.</text><text x="50" y="656" class="note" font-size="20" text-anchor="start" fill="#1e2a8c">Only the Groq API is</text><text x="50" y="684" class="note" font-size="20" text-anchor="start" fill="#1e2a8c">outside our code.</text></g>
+</svg>

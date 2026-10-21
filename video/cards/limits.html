@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Atlas: limits</title>
+<style>
+  html,body{margin:0;height:100%;overflow:hidden;background:#0b1020}
+  body{font-family:"Segoe UI",Inter,system-ui,sans-serif;color:#fff;background:radial-gradient(1100px 600px at 80% 10%,rgba(79,140,255,.2),transparent 60%),#0b1020}
+  .wrap{position:absolute;left:8vw;right:8vw;top:12vh}
+  h1{font-size:3.6vw;letter-spacing:-.02em;margin:0 0 3vh;opacity:0;animation:in .8s .3s forwards}
+  ul{list-style:none;padding:0;margin:0;display:grid;gap:2vh}
+  li{display:flex;gap:1.4vw;align-items:center;font-size:2.3vw;padding:1.6vh 1.6vw;border:.12vw solid #34415f;border-radius:1.2vw;background:rgba(255,255,255,.04);opacity:0;transform:translateY(1vw);animation:up .9s forwards}
+  li b{display:grid;place-items:center;flex:none;width:2.6vw;height:2.6vw;border-radius:50%;border:.15vw solid #f5a524;color:#f5a524;font-size:1.6vw}
+  li:nth-child(1){animation-delay:3.0s}li:nth-child(2){animation-delay:5.6s}li:nth-child(3){animation-delay:8.2s}li:nth-child(4){animation-delay:11.8s}
+  @keyframes in{to{opacity:1}}
+  @keyframes up{to{opacity:1;transform:none}}
+  @media (prefers-reduced-motion: reduce){*{animation-duration:.01s!important}}
+</style></head>
+<body><div class="wrap"><h1>What this does not show</h1>
+<ul>
+  <li><b>!</b>Not a certified security product</li>
+  <li><b>!</b>No independent penetration test</li>
+  <li><b>!</b>Prompt-injection detection is only heuristic</li>
+  <li><b>!</b>On this deployment, approval replay protection and audit are per server instance</li>
+</ul></div></body></html>

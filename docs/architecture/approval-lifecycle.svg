@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" width="1600" height="900" role="img" aria-label="Approval lifecycle. A sensitive action waits for a person. The server still does the checking.">
+<title>Approval lifecycle</title>
+<desc>A sensitive action waits for a person. The server still does the checking.</desc>
+<defs><marker id="arrow-neutral" viewBox="0 0 10 10" refX="8" refY="5" markerUnits="userSpaceOnUse" markerWidth="16" markerHeight="16" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#8b95ad"/></marker><marker id="arrow-model" viewBox="0 0 10 10" refX="8" refY="5" markerUnits="userSpaceOnUse" markerWidth="16" markerHeight="16" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#1b9ccf"/></marker><marker id="arrow-tool" viewBox="0 0 10 10" refX="8" refY="5" markerUnits="userSpaceOnUse" markerWidth="16" markerHeight="16" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#1b9ccf"/></marker><marker id="arrow-allow" viewBox="0 0 10 10" refX="8" refY="5" markerUnits="userSpaceOnUse" markerWidth="16" markerHeight="16" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#1f9d57"/></marker><marker id="arrow-deny" viewBox="0 0 10 10" refX="8" refY="5" markerUnits="userSpaceOnUse" markerWidth="16" markerHeight="16" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#d93a35"/></marker><marker id="arrow-pending" viewBox="0 0 10 10" refX="8" refY="5" markerUnits="userSpaceOnUse" markerWidth="16" markerHeight="16" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#d98a00"/></marker><marker id="arrow-server" viewBox="0 0 10 10" refX="8" refY="5" markerUnits="userSpaceOnUse" markerWidth="16" markerHeight="16" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#4a5be0"/></marker><marker id="arrow-muted" viewBox="0 0 10 10" refX="8" refY="5" markerUnits="userSpaceOnUse" markerWidth="16" markerHeight="16" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#c3c9d6"/></marker><style>
+  text{font-family:Inter,"Segoe UI",system-ui,sans-serif}
+  .bg{fill:#fbfcfe}
+  .h1{font-size:44px;font-weight:700;fill:#121a30;letter-spacing:-0.5px}
+  .h2{font-size:24px;fill:#5b6579}
+  .ttl{font-size:25px;font-weight:700}
+  .sub{font-size:19px}
+  .badge{font-size:15px;font-weight:700;letter-spacing:.8px}
+  .note{font-weight:600}
+  .boundary{fill:rgba(74,91,224,.045);stroke:#4a5be0;stroke-width:3;stroke-dasharray:14 10}
+  .blabel{font-size:17px;font-weight:700;letter-spacing:2px;fill:#3a49c8}
+  .edge{fill:none;stroke-width:3.5;stroke-linejoin:round}
+  .edge.dashed{stroke-dasharray:10 8}
+  .lbg{fill:#fbfcfe;stroke:#dfe3ec}
+  .elabel{font-size:17px;font-weight:600}
+</style></defs>
+<rect class="bg" width="1600" height="900"/>
+<text x="60" y="78" class="h1">Approval lifecycle</text>
+<text x="60" y="118" class="h2">A sensitive action waits for a person. The server still does the checking.</text>
+<g data-id="proposed" data-step="1"><rect x="50" y="280" width="190" height="120" rx="16" fill="#e7f6fc" stroke="#1b9ccf" stroke-width="2.5"/><text x="68" y="314" class="ttl" fill="#0c4a66">Proposed</text><text x="68" y="342" class="sub" fill="#0c4a66">send_message</text><text x="68" y="367" class="sub" fill="#0c4a66">to the team</text></g>
+<g data-id="checks" data-step="2"><rect x="310" y="280" width="190" height="120" rx="16" fill="#eef1ff" stroke="#4a5be0" stroke-width="2.5"/><text x="328" y="314" class="ttl" fill="#1e2a8c">Earlier checks</text><text x="328" y="342" class="sub" fill="#1e2a8c">trust, allowlist,</text><text x="328" y="367" class="sub" fill="#1e2a8c">identity, resource</text><text x="316" y="268" class="badge" fill="#4a5be0">SERVER</text></g>
+<g data-id="pending" data-step="3"><rect x="570" y="280" width="190" height="120" rx="16" fill="#fff4dc" stroke="#d98a00" stroke-width="2.5"/><text x="588" y="314" class="ttl" fill="#6d4600">Parked</text><text x="588" y="342" class="sub" fill="#6d4600">call, arguments,</text><text x="588" y="367" class="sub" fill="#6d4600">policy, session</text><text x="576" y="268" class="badge" fill="#d98a00">PENDING</text></g>
+<g data-id="human" data-step="5"><rect x="830" y="280" width="190" height="120" rx="16" fill="#f3f5fa" stroke="#8b95ad" stroke-width="2.5"/><text x="848" y="314" class="ttl" fill="#1b2338">You decide</text><text x="848" y="342" class="sub" fill="#1b2338">Approve or Deny</text><text x="848" y="367" class="sub" fill="#1b2338">on the card</text><text x="836" y="268" class="badge" fill="#8b95ad">BROWSER</text></g>
+<g data-id="validate" data-step="6"><rect x="1090" y="280" width="190" height="120" rx="16" fill="#eef1ff" stroke="#4a5be0" stroke-width="2.5"/><text x="1108" y="314" class="ttl" fill="#1e2a8c">Validate</text><text x="1108" y="342" class="sub" fill="#1e2a8c">session, call id,</text><text x="1108" y="367" class="sub" fill="#1e2a8c">ticket, expiry</text><text x="1096" y="268" class="badge" fill="#4a5be0">SERVER</text></g>
+<g data-id="denied" data-step="7"><rect x="1350" y="215" width="190" height="90" rx="16" fill="#fdeceb" stroke="#d93a35" stroke-width="2.5"/><text x="1368" y="249" class="ttl" fill="#7d1b18">Denied</text><text x="1368" y="277" class="sub" fill="#7d1b18">not run</text></g>
+<g data-id="run" data-step="7"><rect x="1350" y="345" width="190" height="110" rx="16" fill="#e6f6ec" stroke="#1f9d57" stroke-width="2.5"/><text x="1368" y="379" class="ttl" fill="#0d5a31">Re-checked</text><text x="1368" y="407" class="sub" fill="#0d5a31">then runs once</text></g>
+<g data-id="ticket" data-step="4"><rect x="570" y="520" width="190" height="130" rx="16" fill="#fff4dc" stroke="#d98a00" stroke-width="2.5"/><text x="588" y="554" class="ttl" fill="#6d4600">Sealed ticket</text><text x="588" y="582" class="sub" fill="#6d4600">to the browser,</text><text x="588" y="607" class="sub" fill="#6d4600">unreadable, expires</text></g>
+<g data-id="audit" data-step="8"><rect x="1090" y="520" width="450" height="110" rx="16" fill="#e6f6ec" stroke="#1f9d57" stroke-width="2.5"/><text x="1108" y="554" class="ttl" fill="#0d5a31">Audit event</text><text x="1108" y="582" class="sub" fill="#0d5a31">both decisions are recorded</text></g>
+<g data-id="e1" data-step="2"><path d="M240 340 L310 340" pathLength="1" class="edge" stroke="#1b9ccf" marker-end="url(#arrow-model)"/></g>
+<g data-id="e2" data-step="3"><path d="M500 340 L570 340" pathLength="1" class="edge" stroke="#d98a00" marker-end="url(#arrow-pending)"/></g>
+<g data-id="e3" data-step="4"><path d="M665 400 L665 520" pathLength="1" class="edge dashed" stroke="#d98a00" marker-end="url(#arrow-pending)"/></g>
+<g data-id="e4" data-step="5"><path d="M760 340 L830 340" pathLength="1" class="edge" stroke="#d98a00" marker-end="url(#arrow-pending)"/></g>
+<g data-id="e5" data-step="6"><path d="M1020 340 L1090 340" pathLength="1" class="edge" stroke="#8b95ad" marker-end="url(#arrow-neutral)"/></g>
+<g data-id="e6" data-step="7"><path d="M1280 340 L1315 340 L1315 260 L1350 260" pathLength="1" class="edge" stroke="#d93a35" marker-end="url(#arrow-deny)"/></g>
+<g data-id="e7" data-step="7"><path d="M1280 340 L1315 340 L1315 400 L1350 400" pathLength="1" class="edge" stroke="#1f9d57" marker-end="url(#arrow-allow)"/></g>
+<g data-id="e8" data-step="8"><path d="M1445 455 L1445 490 L1315 490 L1315 520" pathLength="1" class="edge dashed" stroke="#1f9d57" marker-end="url(#arrow-allow)"/></g>
+<g data-id="n1" data-step="7"><text x="50" y="748" class="note" font-size="24" text-anchor="start" fill="#6d4600">In this demo a send only appends to a simulated outbox. Nothing is delivered.</text></g>
+</svg>

@@ -1,33 +1,82 @@
 {
-  "voice": { "id": "EXAVITQu4vr4xnSDxMaL", "name": "Sarah", "model": "eleven_multilingual_v2" },
+  "voice": { "id": "EXAVITQu4vr4xnSDxMaL", "name": "Sarah", "model": "eleven_multilingual_v2", "speed": 0.95, "stability": 0.55, "similarity_boost": 0.75, "style": 0.1 },
   "scenes": [
     {
-      "id": "s1-open",
-      "text": "Your AI agent proposed the action. Should it be allowed to execute it? This is Atlas, a live demonstration of one idea: a model's proposal is not the same thing as authorization."
+      "id": "s1-question",
+      "title": "The question",
+      "beats": [
+        { "id": "b01", "text": "When an AI agent decides to do something, what actually decides whether it is allowed to happen?", "pause": 1.2 },
+        { "id": "b02", "text": "That question is behind this whole project. It's called Atlas.", "pause": 3.2 }
+      ]
     },
     {
-      "id": "s2-problem",
-      "text": "Here's the problem. An assistant that can read files and send messages can be talked into using them. In this fictional workspace, a third-party plugin hides an instruction inside an ordinary project update."
+      "id": "s2-atlas",
+      "title": "What Atlas does",
+      "beats": [
+        { "id": "b03", "text": "Atlas looks like an ordinary assistant. You type a request, and it can use tools: read a project record, open a document, fetch updates from a plugin, or send a message.", "pause": 1.6 },
+        { "id": "b04", "text": "Everything here is a controlled, synthetic environment. The documents are fictional, and a message is only ever added to an in-memory outbox.", "pause": 2.0 }
+      ]
     },
     {
-      "id": "s3-off-on",
-      "text": "Watch the same request twice. With Security off, a controlled weakness, the scripted agent uses the unverified plugin, follows the hidden instruction, reads a restricted memo, and queues it for an outside address. Everything is fictional, and off is only a demonstration mode. Now Security on. Same request. The plugin is blocked, and the agent uses the verified project record instead."
+      "id": "s3-flow",
+      "title": "Build the request flow",
+      "beats": [
+        { "id": "b05", "text": "Let's build the flow, one piece at a time. It starts with you, sending a request.", "pause": 1.6 },
+        { "id": "b06", "text": "The request reaches a model. The model reads it, and may decide that a tool would help.", "pause": 1.8 },
+        { "id": "b07", "text": "When it does, it doesn't run the tool. It produces a proposal: a tool name, and some arguments. That is all the model can do.", "pause": 3.0 },
+        { "id": "b08", "text": "Now the important part. Between that proposal and the tool sits the server. This is trusted code that we wrote, and it makes the decision.", "pause": 3.0 },
+        { "id": "b09", "text": "The server checks the call against policy. If it's allowed, the tool runs on synthetic data. If not, nothing runs. Either way, an event is recorded.", "pause": 3.5 }
+      ]
     },
     {
-      "id": "s4-policy",
-      "text": "Now the live model, Groq. I claim to be the CFO and ask it to read the compensation document. The model proposes the read. The server checks the resource against who may see it, and denies the call. The walkthrough names the control that decided, and why."
+      "id": "s4-offon",
+      "title": "Security off versus on",
+      "beats": [
+        { "id": "b10", "text": "Now let's see the difference in the real application. These are scripted scenarios, not the live model, so they behave the same way every time.", "pause": 1.8 },
+        { "id": "b11", "text": "With Security off, a plugin update contains a hidden instruction. The scripted agent follows it, reads a restricted memo, and queues it for an outside address. Nothing is really sent, but nothing stopped it either.", "pause": 3.0 },
+        { "id": "b12", "text": "Now the same request with Security on. The plugin is blocked, because it is unsigned. The agent finishes the task from the verified project record instead.", "pause": 3.0 },
+        { "id": "b13", "text": "A live model might not fall for the hidden instruction at all. That is why the vulnerable behaviour is scripted: it makes the comparison repeatable.", "pause": 3.5 }
+      ]
     },
     {
-      "id": "s5-approval",
-      "text": "Sensitive actions wait for a human. Sending the summary to the team is held. I deny it, and nothing is sent. Run it again, approve, and the server re-checks the call and runs it once, into a simulated outbox. Nothing ever leaves the app."
+      "id": "s5-boundary",
+      "title": "The decision boundary",
+      "beats": [
+        { "id": "b14", "text": "Now a live request. I'm asking the real model, running on Groq, to read the compensation document, and I claim to be the chief financial officer.", "pause": 2.8 },
+        { "id": "b15", "text": "The model proposes reading that document. The server compares the call with the agent's permissions. The scope for that document is missing, so the call is denied.", "pause": 3.0 },
+        { "id": "b16", "text": "Notice what did not happen. Nobody asked the model to behave. A claim made in the prompt carries no authority, because the decision lives in server code.", "pause": 3.5 }
+      ]
     },
     {
-      "id": "s6-failclosed",
-      "text": "Now a simulated authorization outage. With Security on, the system fails closed. The send is denied, not guessed. The audit record matches the decision the server actually made."
+      "id": "s6-approval",
+      "title": "Human approval",
+      "beats": [
+        { "id": "b17", "text": "Some actions are allowed, but only with a human decision. Sending a message to the team is one of them.", "pause": 1.4 },
+        { "id": "b18", "text": "The server pauses the action and shows an approval card. Nothing has been sent.", "pause": 2.8 },
+        { "id": "b19", "text": "If I deny, the action is recorded as declined and never runs. If I approve, the server checks that the approval belongs to this session, then re-runs the full set of checks before executing.", "pause": 3.0 },
+        { "id": "b20", "text": "And remember, a send here only writes to a simulated outbox. No message ever leaves the application.", "pause": 3.0 }
+      ]
     },
     {
-      "id": "s7-takeaway",
-      "text": "This is the path every request takes. The model proposes. The server validates, authorizes, asks for approval, filters the output, and records an audit event. A model's proposal is not authorization."
+      "id": "s7-failclosed",
+      "title": "Fail closed and evidence",
+      "beats": [
+        { "id": "b21", "text": "Next, a question about failure. What should happen if the authorization check itself can't complete?", "pause": 1.6 },
+        { "id": "b22", "text": "In this scenario we simulate that outage. With Security on, the system fails closed: if a required check can't finish, the action is denied.", "pause": 2.4 },
+        { "id": "b23", "text": "Without protection, the same outage fails open. That is the weakness the comparison shows.", "pause": 3.0 },
+        { "id": "b24", "text": "In the evidence panel we can see each control, its decision, a reason code, and the matching audit record. The record states what the server decided. It does not depend on what the model said.", "pause": 3.0 },
+        { "id": "b25", "text": "This was a controlled, simulated failure. It does not prove how the system behaves in a real infrastructure outage.", "pause": 3.0 }
+      ]
+    },
+    {
+      "id": "s8-summary",
+      "title": "What has been demonstrated",
+      "beats": [
+        { "id": "b26", "text": "So, what did Atlas demonstrate?", "pause": 1.4 },
+        { "id": "b27", "text": "A model's output is a proposal. Server-side policy decides what executes. Sensitive actions can wait for a person. A failed check must not allow the action. And audit evidence explains what happened.", "pause": 3.5 },
+        { "id": "b28", "text": "What it does not show: this is not a certified product, it has not had an independent penetration test, and prompt-injection detection is only heuristic. On this deployment, approval replay protection and audit are per server instance.", "pause": 3.0 },
+        { "id": "b29", "text": "You can try the live demo and read the code on GitHub. Thanks for watching.", "pause": 3.5 }
+      ]
     }
   ]
 }

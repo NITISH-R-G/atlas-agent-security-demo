@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" width="1600" height="900" role="img" aria-label="Security OFF versus Security ON. The same scripted request, two outcomes. Scripted scenarios, not the live model.">
+<title>Security OFF versus Security ON</title>
+<desc>The same scripted request, two outcomes. Scripted scenarios, not the live model.</desc>
+<defs><marker id="arrow-neutral" viewBox="0 0 10 10" refX="8" refY="5" markerUnits="userSpaceOnUse" markerWidth="16" markerHeight="16" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#8b95ad"/></marker><marker id="arrow-model" viewBox="0 0 10 10" refX="8" refY="5" markerUnits="userSpaceOnUse" markerWidth="16" markerHeight="16" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#1b9ccf"/></marker><marker id="arrow-tool" viewBox="0 0 10 10" refX="8" refY="5" markerUnits="userSpaceOnUse" markerWidth="16" markerHeight="16" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#1b9ccf"/></marker><marker id="arrow-allow" viewBox="0 0 10 10" refX="8" refY="5" markerUnits="userSpaceOnUse" markerWidth="16" markerHeight="16" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#1f9d57"/></marker><marker id="arrow-deny" viewBox="0 0 10 10" refX="8" refY="5" markerUnits="userSpaceOnUse" markerWidth="16" markerHeight="16" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#d93a35"/></marker><marker id="arrow-pending" viewBox="0 0 10 10" refX="8" refY="5" markerUnits="userSpaceOnUse" markerWidth="16" markerHeight="16" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#d98a00"/></marker><marker id="arrow-server" viewBox="0 0 10 10" refX="8" refY="5" markerUnits="userSpaceOnUse" markerWidth="16" markerHeight="16" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#4a5be0"/></marker><marker id="arrow-muted" viewBox="0 0 10 10" refX="8" refY="5" markerUnits="userSpaceOnUse" markerWidth="16" markerHeight="16" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#c3c9d6"/></marker><style>
+  text{font-family:Inter,"Segoe UI",system-ui,sans-serif}
+  .bg{fill:#fbfcfe}
+  .h1{font-size:44px;font-weight:700;fill:#121a30;letter-spacing:-0.5px}
+  .h2{font-size:24px;fill:#5b6579}
+  .ttl{font-size:25px;font-weight:700}
+  .sub{font-size:19px}
+  .badge{font-size:15px;font-weight:700;letter-spacing:.8px}
+  .note{font-weight:600}
+  .boundary{fill:rgba(74,91,224,.045);stroke:#4a5be0;stroke-width:3;stroke-dasharray:14 10}
+  .blabel{font-size:17px;font-weight:700;letter-spacing:2px;fill:#3a49c8}
+  .edge{fill:none;stroke-width:3.5;stroke-linejoin:round}
+  .edge.dashed{stroke-dasharray:10 8}
+  .lbg{fill:#fbfcfe;stroke:#dfe3ec}
+  .elabel{font-size:17px;font-weight:600}
+</style></defs>
+<rect class="bg" width="1600" height="900"/>
+<text x="60" y="78" class="h1">Security OFF versus Security ON</text>
+<text x="60" y="118" class="h2">The same scripted request, two outcomes. Scripted scenarios, not the live model.</text>
+<g data-id="offh" data-step="1"><rect x="60" y="160" width="640" height="80" rx="16" fill="#fdeceb" stroke="#d93a35" stroke-width="2.5"/><text x="78" y="209" class="ttl" fill="#7d1b18">Security OFF · controlled demo weakness</text></g>
+<g data-id="onh" data-step="1"><rect x="900" y="160" width="640" height="80" rx="16" fill="#e6f6ec" stroke="#1f9d57" stroke-width="2.5"/><text x="918" y="209" class="ttl" fill="#0d5a31">Security ON · server enforcement</text></g>
+<g data-id="off0" data-step="2"><rect x="60" y="280" width="640" height="78" rx="16" fill="#fdeceb" stroke="#d93a35" stroke-width="2.5"/><text x="78" y="328" class="ttl" fill="#7d1b18">runs; its hidden instruction is followed</text></g>
+<g data-id="on0" data-step="2"><rect x="900" y="280" width="640" height="78" rx="16" fill="#e6f6ec" stroke="#1f9d57" stroke-width="2.5"/><text x="918" y="328" class="ttl" fill="#0d5a31">blocked: unsigned, unpinned</text></g>
+<g data-id="k0" data-step="2"><text x="800" y="326" class="note" font-size="19" text-anchor="middle" fill="#1b2338">Untrusted plugin</text></g>
+<g data-id="off1" data-step="3"><rect x="60" y="390" width="640" height="78" rx="16" fill="#fdeceb" stroke="#d93a35" stroke-width="2.5"/><text x="78" y="438" class="ttl" fill="#7d1b18">read by the scripted agent</text></g>
+<g data-id="on1" data-step="3"><rect x="900" y="390" width="640" height="78" rx="16" fill="#e6f6ec" stroke="#1f9d57" stroke-width="2.5"/><text x="918" y="438" class="ttl" fill="#0d5a31">never touched</text></g>
+<g data-id="k1" data-step="3"><text x="800" y="436" class="note" font-size="19" text-anchor="middle" fill="#1b2338">Restricted memo</text></g>
+<g data-id="off2" data-step="4"><rect x="60" y="500" width="640" height="78" rx="16" fill="#fdeceb" stroke="#d93a35" stroke-width="2.5"/><text x="78" y="548" class="ttl" fill="#7d1b18">message queued (simulated)</text></g>
+<g data-id="on2" data-step="4"><rect x="900" y="500" width="640" height="78" rx="16" fill="#e6f6ec" stroke="#1f9d57" stroke-width="2.5"/><text x="918" y="548" class="ttl" fill="#0d5a31">no send; verified record used</text></g>
+<g data-id="k2" data-step="4"><text x="800" y="546" class="note" font-size="19" text-anchor="middle" fill="#1b2338">Outside address</text></g>
+<g data-id="off3" data-step="5"><rect x="60" y="610" width="640" height="78" rx="16" fill="#fdeceb" stroke="#d93a35" stroke-width="2.5"/><text x="78" y="658" class="ttl" fill="#7d1b18">no audit records</text></g>
+<g data-id="on3" data-step="5"><rect x="900" y="610" width="640" height="78" rx="16" fill="#e6f6ec" stroke="#1f9d57" stroke-width="2.5"/><text x="918" y="658" class="ttl" fill="#0d5a31">an audit record per decision</text></g>
+<g data-id="k3" data-step="5"><text x="800" y="656" class="note" font-size="19" text-anchor="middle" fill="#1b2338">Evidence</text></g>
+<g data-id="n1" data-step="6"><text x="60" y="748" class="note" font-size="24" text-anchor="start" fill="#1e2a8c">Same request, same data. OFF is a demonstration mode, not a recommended configuration.</text></g>
+</svg>

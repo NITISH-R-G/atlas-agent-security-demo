@@ -1,0 +1,27 @@
+{
+  "architecture-overview": {
+    "key": "A",
+    "title": "Atlas system architecture",
+    "subtitle": "The model proposes. Server-side code decides, executes and records."
+  },
+  "request-lifecycle": {
+    "key": "B",
+    "title": "Request and policy lifecycle",
+    "subtitle": "One tool call, from your request to a recorded outcome."
+  },
+  "approval-lifecycle": {
+    "key": "C",
+    "title": "Approval lifecycle",
+    "subtitle": "A sensitive action waits for a person. The server still does the checking."
+  },
+  "security-mode-comparison": {
+    "key": "D",
+    "title": "Security OFF versus Security ON",
+    "subtitle": "The same scripted request, two outcomes. Scripted scenarios, not the live model."
+  },
+  "fail-closed-flow": {
+    "key": "E",
+    "title": "Fail closed",
+    "subtitle": "If a required check cannot complete, the action does not run."
+  }
+}

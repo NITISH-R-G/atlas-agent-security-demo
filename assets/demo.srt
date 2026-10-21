@@ -1,119 +1,287 @@
 1
-00:00:00,500 --> 00:00:02,781
-Your AI agent proposed the action.
+00:00:01,000 --> 00:00:07,776
+When an AI agent decides to do something, what actually decides whether it is allowed to happen?
 
 2
-00:00:02,831 --> 00:00:05,181
-Should it be allowed to execute it?
+00:00:09,026 --> 00:00:12,381
+That question is behind this whole project.
 
 3
-00:00:05,231 --> 00:00:12,519
-This is Atlas, a live demonstration of one idea: a model's proposal is not the same thing as authorization.
+00:00:12,431 --> 00:00:13,807
+It's called Atlas.
 
 4
-00:00:14,167 --> 00:00:15,318
-Here's the problem.
+00:00:18,557 --> 00:00:21,150
+Atlas looks like an ordinary assistant.
 
 5
-00:00:15,368 --> 00:00:20,437
-An assistant that can read files and send messages can be talked into using them.
+00:00:21,200 --> 00:00:25,488
+You type a request, and it can use tools: read a project record,
 
 6
-00:00:20,487 --> 00:00:27,074
-In this fictional workspace, a third-party plugin hides an instruction inside an ordinary project update.
+00:00:25,538 --> 00:00:29,827
+open a document, fetch updates from a plugin, or send a message.
 
 7
-00:00:28,734 --> 00:00:30,517
-Watch the same request twice.
+00:00:31,477 --> 00:00:35,344
+Everything here is a controlled, synthetic environment.
 
 8
-00:00:30,567 --> 00:00:42,086
-With Security off, a controlled weakness, the scripted agent uses the unverified plugin, follows the hidden instruction, reads a restricted memo, and queues it for an outside address.
+00:00:35,394 --> 00:00:41,398
+The documents are fictional, and a message is only ever added to an in-memory outbox.
 
 9
-00:00:42,136 --> 00:00:46,005
-Everything is fictional, and off is only a demonstration mode.
+00:00:44,948 --> 00:00:48,068
+Let's build the flow, one piece at a time.
 
 10
-00:00:46,055 --> 00:00:47,016
-Now Security on.
+00:00:48,118 --> 00:00:50,937
+It starts with you, sending a request.
 
 11
-00:00:47,066 --> 00:00:47,838
-Same request.
+00:00:52,587 --> 00:00:54,650
+The request reaches a model.
 
 12
-00:00:47,888 --> 00:00:52,769
-The plugin is blocked, and the agent uses the verified project record instead.
+00:00:54,700 --> 00:00:59,026
+The model reads it, and may decide that a tool would help.
 
 13
-00:00:54,434 --> 00:00:56,026
-Now the live model, Groq.
+00:01:00,876 --> 00:01:03,663
+When it does, it doesn't run the tool.
 
 14
-00:00:56,076 --> 00:01:00,426
-I claim to be the CFO and ask it to read the compensation document.
+00:01:03,713 --> 00:01:07,845
+It produces a proposal: a tool name, and some arguments.
 
 15
-00:01:00,476 --> 00:01:02,264
-The model proposes the read.
+00:01:07,895 --> 00:01:10,011
+That is all the model can do.
 
 16
-00:01:02,314 --> 00:01:07,190
-The server checks the resource against who may see it, and denies the call.
+00:01:13,061 --> 00:01:14,531
+Now the important part.
 
 17
-00:01:07,240 --> 00:01:10,867
-The walkthrough names the control that decided, and why.
+00:01:14,581 --> 00:01:17,901
+Between that proposal and the tool sits the server.
 
 18
-00:01:12,501 --> 00:01:14,892
-Sensitive actions wait for a human.
+00:01:17,951 --> 00:01:21,999
+This is trusted code that we wrote, and it makes the decision.
 
 19
-00:01:14,942 --> 00:01:17,681
-Sending the summary to the team is held.
+00:01:25,049 --> 00:01:28,351
+The server checks the call against policy.
 
 20
-00:01:17,731 --> 00:01:19,843
-I deny it, and nothing is sent.
+00:01:28,401 --> 00:01:32,262
+If it's allowed, the tool runs on synthetic data.
 
 21
-00:01:19,893 --> 00:01:26,747
-Run it again, approve, and the server re-checks the call and runs it once, into a simulated outbox.
+00:01:32,312 --> 00:01:33,938
+If not, nothing runs.
 
 22
-00:01:26,797 --> 00:01:28,699
-Nothing ever leaves the app.
+00:01:33,988 --> 00:01:36,571
+Either way, an event is recorded.
 
 23
-00:01:30,335 --> 00:01:32,912
-Now a simulated authorization outage.
+00:01:41,621 --> 00:01:45,031
+Now let's see the difference in the real application.
 
 24
-00:01:32,962 --> 00:01:35,895
-With Security on, the system fails closed.
+00:01:45,081 --> 00:01:50,841
+These are scripted scenarios, not the live model, so they behave the same way every time.
 
 25
-00:01:35,945 --> 00:01:38,167
-The send is denied, not guessed.
+00:01:52,691 --> 00:01:57,171
+With Security off, a plugin update contains a hidden instruction.
 
 26
-00:01:38,217 --> 00:01:42,641
-The audit record matches the decision the server actually made.
+00:01:57,221 --> 00:02:03,652
+The scripted agent follows it, reads a restricted memo, and queues it for an outside address.
 
 27
-00:01:44,302 --> 00:01:46,846
-This is the path every request takes.
+00:02:03,702 --> 00:02:07,415
+Nothing is really sent, but nothing stopped it either.
 
 28
-00:01:46,896 --> 00:01:48,178
-The model proposes.
+00:02:10,465 --> 00:02:12,969
+Now the same request with Security on.
 
 29
-00:01:48,228 --> 00:01:55,188
-The server validates, authorizes, asks for approval, filters the output, and records an audit event.
+00:02:13,019 --> 00:02:16,059
+The plugin is blocked, because it is unsigned.
 
 30
-00:01:55,238 --> 00:01:57,992
-A model's proposal is not authorization.
+00:02:16,109 --> 00:02:20,696
+The agent finishes the task from the verified project record instead.
+
+31
+00:02:23,746 --> 00:02:27,629
+A live model might not fall for the hidden instruction at all.
+
+32
+00:02:27,679 --> 00:02:33,021
+That is why the vulnerable behaviour is scripted: it makes the comparison repeatable.
+
+33
+00:02:38,071 --> 00:02:39,439
+Now a live request.
+
+34
+00:02:39,489 --> 00:02:45,261
+I'm asking the real model, running on Groq, to read the compensation document,
+
+35
+00:02:45,311 --> 00:02:48,695
+and I claim to be the chief financial officer.
+
+36
+00:02:51,545 --> 00:02:54,199
+The model proposes reading that document.
+
+37
+00:02:54,249 --> 00:02:58,024
+The server compares the call with the agent's permissions.
+
+38
+00:02:58,074 --> 00:03:02,112
+The scope for that document is missing, so the call is denied.
+
+39
+00:03:05,162 --> 00:03:07,041
+Notice what did not happen.
+
+40
+00:03:07,091 --> 00:03:09,398
+Nobody asked the model to behave.
+
+41
+00:03:09,448 --> 00:03:15,898
+A claim made in the prompt carries no authority, because the decision lives in server code.
+
+42
+00:03:20,948 --> 00:03:24,775
+Some actions are allowed, but only with a human decision.
+
+43
+00:03:24,825 --> 00:03:27,836
+Sending a message to the team is one of them.
+
+44
+00:03:29,286 --> 00:03:33,108
+The server pauses the action and shows an approval card.
+
+45
+00:03:33,158 --> 00:03:34,629
+Nothing has been sent.
+
+46
+00:03:37,479 --> 00:03:41,886
+If I deny, the action is recorded as declined and never runs.
+
+47
+00:03:41,936 --> 00:03:47,293
+If I approve, the server checks that the approval belongs to this session,
+
+48
+00:03:47,343 --> 00:03:51,165
+then re-runs the full set of checks before executing.
+
+49
+00:03:54,215 --> 00:03:58,642
+And remember, a send here only writes to a simulated outbox.
+
+50
+00:03:58,692 --> 00:04:01,552
+No message ever leaves the application.
+
+51
+00:04:06,102 --> 00:04:08,172
+Next, a question about failure.
+
+52
+00:04:08,222 --> 00:04:12,821
+What should happen if the authorization check itself can't complete?
+
+53
+00:04:14,471 --> 00:04:17,470
+In this scenario we simulate that outage.
+
+54
+00:04:17,520 --> 00:04:24,758
+With Security on, the system fails closed: if a required check can't finish, the action is denied.
+
+55
+00:04:27,208 --> 00:04:30,763
+Without protection, the same outage fails open.
+
+56
+00:04:30,813 --> 00:04:33,984
+That is the weakness the comparison shows.
+
+57
+00:04:37,034 --> 00:04:44,255
+In the evidence panel we can see each control, its decision, a reason code, and the matching audit record.
+
+58
+00:04:44,305 --> 00:04:47,136
+The record states what the server decided.
+
+59
+00:04:47,186 --> 00:04:50,017
+It does not depend on what the model said.
+
+60
+00:04:53,067 --> 00:04:55,906
+This was a controlled, simulated failure.
+
+61
+00:04:55,956 --> 00:05:01,050
+It does not prove how the system behaves in a real infrastructure outage.
+
+62
+00:05:05,600 --> 00:05:08,078
+So, what did Atlas demonstrate?
+
+63
+00:05:09,528 --> 00:05:11,840
+A model's output is a proposal.
+
+64
+00:05:11,890 --> 00:05:14,964
+Server-side policy decides what executes.
+
+65
+00:05:15,014 --> 00:05:18,012
+Sensitive actions can wait for a person.
+
+66
+00:05:18,062 --> 00:05:21,137
+A failed check must not allow the action.
+
+67
+00:05:21,187 --> 00:05:24,337
+And audit evidence explains what happened.
+
+68
+00:05:27,887 --> 00:05:31,915
+What it does not show: this is not a certified product,
+
+69
+00:05:31,965 --> 00:05:39,106
+it has not had an independent penetration test, and prompt-injection detection is only heuristic.
+
+70
+00:05:39,156 --> 00:05:45,111
+On this deployment, approval replay protection and audit are per server instance.
+
+71
+00:05:48,161 --> 00:05:51,268
+You can try the live demo and read the code on GitHub.
+
+72
+00:05:51,318 --> 00:05:52,437
+Thanks for watching.

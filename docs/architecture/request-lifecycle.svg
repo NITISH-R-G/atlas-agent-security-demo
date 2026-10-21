@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" width="1600" height="900" role="img" aria-label="Request and policy lifecycle. One tool call, from your request to a recorded outcome.">
+<title>Request and policy lifecycle</title>
+<desc>One tool call, from your request to a recorded outcome.</desc>
+<defs><marker id="arrow-neutral" viewBox="0 0 10 10" refX="8" refY="5" markerUnits="userSpaceOnUse" markerWidth="16" markerHeight="16" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#8b95ad"/></marker><marker id="arrow-model" viewBox="0 0 10 10" refX="8" refY="5" markerUnits="userSpaceOnUse" markerWidth="16" markerHeight="16" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#1b9ccf"/></marker><marker id="arrow-tool" viewBox="0 0 10 10" refX="8" refY="5" markerUnits="userSpaceOnUse" markerWidth="16" markerHeight="16" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#1b9ccf"/></marker><marker id="arrow-allow" viewBox="0 0 10 10" refX="8" refY="5" markerUnits="userSpaceOnUse" markerWidth="16" markerHeight="16" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#1f9d57"/></marker><marker id="arrow-deny" viewBox="0 0 10 10" refX="8" refY="5" markerUnits="userSpaceOnUse" markerWidth="16" markerHeight="16" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#d93a35"/></marker><marker id="arrow-pending" viewBox="0 0 10 10" refX="8" refY="5" markerUnits="userSpaceOnUse" markerWidth="16" markerHeight="16" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#d98a00"/></marker><marker id="arrow-server" viewBox="0 0 10 10" refX="8" refY="5" markerUnits="userSpaceOnUse" markerWidth="16" markerHeight="16" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#4a5be0"/></marker><marker id="arrow-muted" viewBox="0 0 10 10" refX="8" refY="5" markerUnits="userSpaceOnUse" markerWidth="16" markerHeight="16" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#c3c9d6"/></marker><style>
+  text{font-family:Inter,"Segoe UI",system-ui,sans-serif}
+  .bg{fill:#fbfcfe}
+  .h1{font-size:44px;font-weight:700;fill:#121a30;letter-spacing:-0.5px}
+  .h2{font-size:24px;fill:#5b6579}
+  .ttl{font-size:25px;font-weight:700}
+  .sub{font-size:19px}
+  .badge{font-size:15px;font-weight:700;letter-spacing:.8px}
+  .note{font-weight:600}
+  .boundary{fill:rgba(74,91,224,.045);stroke:#4a5be0;stroke-width:3;stroke-dasharray:14 10}
+  .blabel{font-size:17px;font-weight:700;letter-spacing:2px;fill:#3a49c8}
+  .edge{fill:none;stroke-width:3.5;stroke-linejoin:round}
+  .edge.dashed{stroke-dasharray:10 8}
+  .lbg{fill:#fbfcfe;stroke:#dfe3ec}
+  .elabel{font-size:17px;font-weight:600}
+</style></defs>
+<rect class="bg" width="1600" height="900"/>
+<text x="60" y="78" class="h1">Request and policy lifecycle</text>
+<text x="60" y="118" class="h2">One tool call, from your request to a recorded outcome.</text>
+<g data-id="user" data-step="1"><rect x="50" y="330" width="190" height="110" rx="16" fill="#f3f5fa" stroke="#8b95ad" stroke-width="2.5"/><text x="68" y="364" class="ttl" fill="#1b2338">You</text><text x="68" y="392" class="sub" fill="#1b2338">send a request</text></g>
+<g data-id="model" data-step="2"><rect x="360" y="330" width="220" height="110" rx="16" fill="#e7f6fc" stroke="#1b9ccf" stroke-width="2.5"/><text x="378" y="364" class="ttl" fill="#0c4a66">Model</text><text x="378" y="392" class="sub" fill="#0c4a66">proposes a tool call</text></g>
+<g data-id="boundary" data-step="4"><rect x="710" y="190" width="840" height="500" rx="26" class="boundary"/><text x="734" y="224" class="blabel">SERVER · TRUST BOUNDARY</text></g>
+<g data-id="policy" data-step="4"><rect x="740" y="300" width="270" height="190" rx="16" fill="#eef1ff" stroke="#4a5be0" stroke-width="2.5"/><text x="758" y="334" class="ttl" fill="#1e2a8c">Policy checks</text><text x="758" y="362" class="sub" fill="#1e2a8c">arguments, trust,</text><text x="758" y="387" class="sub" fill="#1e2a8c">allowlist, identity,</text><text x="758" y="412" class="sub" fill="#1e2a8c">credentials, resource</text></g>
+<g data-id="allow" data-step="6"><rect x="1090" y="235" width="170" height="90" rx="16" fill="#e6f6ec" stroke="#1f9d57" stroke-width="2.5"/><text x="1108" y="269" class="ttl" fill="#0d5a31">Allow</text><text x="1108" y="297" class="sub" fill="#0d5a31">run the tool</text></g>
+<g data-id="deny" data-step="6"><rect x="1090" y="455" width="170" height="90" rx="16" fill="#fdeceb" stroke="#d93a35" stroke-width="2.5"/><text x="1108" y="489" class="ttl" fill="#7d1b18">Deny</text><text x="1108" y="517" class="sub" fill="#7d1b18">nothing runs</text></g>
+<g data-id="tool" data-step="7"><rect x="1330" y="235" width="190" height="90" rx="16" fill="#e7f6fc" stroke="#1b9ccf" stroke-width="2.5"/><text x="1348" y="269" class="ttl" fill="#0c4a66">Tool runs</text><text x="1348" y="297" class="sub" fill="#0c4a66">synthetic data</text></g>
+<g data-id="audit" data-step="8"><rect x="1330" y="430" width="190" height="150" rx="16" fill="#e6f6ec" stroke="#1f9d57" stroke-width="2.5"/><text x="1348" y="464" class="ttl" fill="#0d5a31">Audit event</text><text x="1348" y="492" class="sub" fill="#0d5a31">tool, target,</text><text x="1348" y="517" class="sub" fill="#0d5a31">decision, layer,</text><text x="1348" y="542" class="sub" fill="#0d5a31">source</text></g>
+<g data-id="e1" data-step="2"><path d="M240 385 L360 385" pathLength="1" class="edge" stroke="#8b95ad" marker-end="url(#arrow-neutral)"/><rect x="251.25" y="350" width="97.5" height="32" rx="16" class="lbg"/><text x="300" y="372" class="elabel" text-anchor="middle" fill="#1b2338">request</text></g>
+<g data-id="e2" data-step="3"><path d="M580 385 L740 395" pathLength="1" class="edge" stroke="#1b9ccf" marker-end="url(#arrow-model)"/><rect x="591" y="350" width="108" height="32" rx="16" class="lbg"/><text x="645" y="372" class="elabel" text-anchor="middle" fill="#0c4a66">proposal</text></g>
+<g data-id="e3" data-step="6"><path d="M1010 395 L1050 395 L1050 280 L1090 280" pathLength="1" class="edge" stroke="#1f9d57" marker-end="url(#arrow-allow)"/></g>
+<g data-id="e4" data-step="6"><path d="M1010 395 L1050 395 L1050 500 L1090 500" pathLength="1" class="edge" stroke="#d93a35" marker-end="url(#arrow-deny)"/></g>
+<g data-id="e5" data-step="7"><path d="M1260 280 L1330 280" pathLength="1" class="edge" stroke="#1f9d57" marker-end="url(#arrow-allow)"/></g>
+<g data-id="e6" data-step="8"><path d="M1425 325 L1425 430" pathLength="1" class="edge dashed" stroke="#1f9d57" marker-end="url(#arrow-allow)"/></g>
+<g data-id="e7" data-step="8"><path d="M1260 500 L1295 500 L1295 505 L1330 505" pathLength="1" class="edge dashed" stroke="#d93a35" marker-end="url(#arrow-deny)"/></g>
+<g data-id="n1" data-step="3"><text x="360" y="500" class="note" font-size="22" text-anchor="start" fill="#0c4a66">A proposal is not</text><text x="360" y="530" class="note" font-size="22" text-anchor="start" fill="#0c4a66">permission: the</text><text x="360" y="560" class="note" font-size="22" text-anchor="start" fill="#0c4a66">model can only ask.</text></g>
+<g data-id="n2" data-step="8"><text x="740" y="748" class="note" font-size="26" text-anchor="start" fill="#1e2a8c">The server decides. The decision is recorded either way.</text></g>
+</svg>

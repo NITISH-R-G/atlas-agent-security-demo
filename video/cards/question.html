@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Atlas: the question</title>
+<style>
+  html,body{margin:0;height:100%;overflow:hidden;background:#0b1020}
+  body{font-family:"Segoe UI",Inter,system-ui,sans-serif;color:#fff;
+    background:radial-gradient(1200px 700px at 75% 15%,rgba(79,140,255,.25),transparent 60%),radial-gradient(900px 600px at 10% 95%,rgba(40,200,190,.14),transparent 60%),#0b1020}
+  .stage{position:absolute;inset:0;display:grid;place-items:center}
+  .col{width:60vw}
+  .brand{position:absolute;left:5vw;top:5vh;display:flex;align-items:center;gap:1vw;font-size:2.2vw;font-weight:650;opacity:0;animation:in .8s .3s forwards}
+  .logo{width:3.6vw;height:3.6vw;border-radius:1.1vw;display:grid;place-items:center;font-weight:700;font-size:2vw;background:linear-gradient(135deg,#3b6cff,#27c4d6);box-shadow:0 .6vw 2.4vw rgba(60,110,255,.45)}
+  .bubble{margin-left:auto;width:max-content;max-width:38vw;background:#eef2fb;color:#121a30;border-radius:1.6vw 1.6vw .4vw 1.6vw;padding:1.1vw 1.6vw;font-size:2vw;opacity:0;transform:translateY(1.4vw);animation:up .9s 1.6s forwards}
+  .arrow{height:6vh;width:.35vw;background:linear-gradient(#5cc8ff,transparent);margin:1.2vw 0 0 4vw;opacity:0;animation:in .8s 3.6s forwards}
+  .prop{margin-top:.4vw;width:max-content;border:.18vw solid #5cc8ff;background:rgba(92,200,255,.1);border-radius:1.2vw;padding:1vw 1.6vw;font-size:1.8vw;opacity:0;transform:translateY(1.2vw);animation:up .9s 4.2s forwards}
+  .prop small{display:block;color:#7fd3ff;font-weight:700;letter-spacing:.14em;font-size:1vw;text-transform:uppercase;margin-bottom:.4vw}
+  .prop code{font-family:ui-monospace,Consolas,monospace;color:#d6f2ff}
+  .take{position:absolute;left:0;right:0;bottom:11vh;text-align:center;font-size:4.2vw;font-weight:700;letter-spacing:-.02em;opacity:0;transform:translateY(1vw);animation:up 1.2s 11.5s forwards}
+  .take span{color:#8db4ff}
+  @keyframes in{to{opacity:1}}
+  @keyframes up{to{opacity:1;transform:none}}
+  @media (prefers-reduced-motion: reduce){*{animation-duration:.01s!important}}
+</style></head>
+<body><div class="brand"><div class="logo">A</div>Atlas</div>
+<div class="stage"><div class="col">
+  <div class="bubble">Send the project summary to the team.</div>
+  <div class="arrow"></div>
+  <div class="prop"><small>The agent proposes</small><code>send_message(to: "team@demo-company.example")</code></div>
+</div></div>
+<div class="take">A proposal is <span>not permission.</span></div>
+</body></html>
