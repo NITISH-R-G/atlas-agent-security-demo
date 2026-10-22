@@ -1,6 +1,6 @@
 # Presenter guide
 
-Live app: https://atlas-security-demo.vercel.app. Video: [`assets/demo.mp4`](../assets/demo.mp4). Everything is fictional and simulated.
+Live app: https://atlas-security-demo.vercel.app. Video: [`assets/demo.mp4`](../assets/demo.mp4) (3 minutes, for first-time viewers). Plain-language docs: [Level 1](01-understand-atlas.md). Everything is fictional and simulated.
 
 ## Two minutes before
 

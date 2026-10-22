@@ -9,3 +9,8 @@ Dockerfile
 fly.toml
 *.log
 tsconfig.tsbuildinfo
+assets
+video
+docs
+.git
+video/node_modules

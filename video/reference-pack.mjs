@@ -64,6 +64,8 @@ const map = {
   "approval-lifecycle.png": "approval-lifecycle.png",
   "security-mode-comparison.png": "security-mode-comparison.png",
   "fail-closed-flow.png": "fail-closed-flow.png",
+  "simple-flow.png": "simple-flow.png",
+  "safe-stop.png": "safe-stop.png",
 };
 for (const [from, to] of Object.entries(map)) copyFileSync(join(EXPORTS, from), join(REF, to));
 
@@ -80,10 +82,10 @@ await thumb.setContent(`<!doctype html><meta charset="utf-8"><style>
   .tag{position:absolute;left:94px;bottom:80px;font-size:28px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#7fd3ff}
   img{position:absolute;right:70px;top:250px;width:860px;border-radius:26px;box-shadow:0 30px 90px rgba(0,0,0,.55);border:2px solid #2c3a62}
 </style><div class="logo"><i>A</i>Atlas</div>
-<h1>A proposal is <span>not permission.</span></h1>
-<p>How an AI agent can propose an action while the server decides whether it runs.</p>
-<div class="tag">6-minute explainer · live demo</div>
-<img src="${dataUri(join(EXPORTS, "request-lifecycle.png"))}">`);
+<h1>The AI suggests. <span>Atlas checks.</span></h1>
+<p>A plain-English look at how Atlas decides whether an AI action may happen.</p>
+<div class="tag">3-minute explainer · live demo</div>
+<img src="${dataUri(join(EXPORTS, "simple-flow.png"))}">`);
 await thumb.waitForTimeout(600);
 await thumb.screenshot({ path: join(ROOT, "..", "assets", "video-thumbnail.png") });
 await b.close();

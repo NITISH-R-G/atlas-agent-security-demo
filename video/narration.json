@@ -1,81 +1,138 @@
 {
-  "voice": { "id": "EXAVITQu4vr4xnSDxMaL", "name": "Sarah", "model": "eleven_multilingual_v2", "speed": 0.95, "stability": 0.55, "similarity_boost": 0.75, "style": 0.1 },
+  "voice": {
+    "id": "EXAVITQu4vr4xnSDxMaL",
+    "name": "Sarah",
+    "model": "eleven_multilingual_v2",
+    "speed": 0.95,
+    "stability": 0.55,
+    "similarity_boost": 0.75,
+    "style": 0.1
+  },
   "scenes": [
     {
-      "id": "s1-question",
-      "title": "The question",
+      "id": "p1-what",
+      "title": "What is Atlas?",
       "beats": [
-        { "id": "b01", "text": "When an AI agent decides to do something, what actually decides whether it is allowed to happen?", "pause": 1.2 },
-        { "id": "b02", "text": "That question is behind this whole project. It's called Atlas.", "pause": 3.2 }
+        {
+          "id": "b01",
+          "text": "When an AI agent decides to do something, what actually decides whether it is allowed to happen?",
+          "pause": 1.5
+        },
+        {
+          "id": "b02",
+          "text": "That question is behind this whole project. It's called Atlas.",
+          "pause": 3
+        },
+        {
+          "id": "b03",
+          "text": "Atlas looks like an ordinary assistant. You type a request, and it can use tools: read a project record, open a document, fetch updates from a plugin, or send a message.",
+          "pause": 3.5
+        }
       ]
     },
     {
-      "id": "s2-atlas",
-      "title": "What Atlas does",
+      "id": "p2-flow",
+      "title": "The important difference",
       "beats": [
-        { "id": "b03", "text": "Atlas looks like an ordinary assistant. You type a request, and it can use tools: read a project record, open a document, fetch updates from a plugin, or send a message.", "pause": 1.6 },
-        { "id": "b04", "text": "Everything here is a controlled, synthetic environment. The documents are fictional, and a message is only ever added to an in-memory outbox.", "pause": 2.0 }
+        {
+          "id": "b05",
+          "text": "Let's build the flow, one piece at a time. It starts with you, sending a request.",
+          "pause": 2.4
+        },
+        {
+          "id": "n01",
+          "text": "Say you ask: read the project update, and send a summary to the team. The AI reads your request, and suggests what to do.",
+          "pause": 3.2
+        },
+        {
+          "id": "n02",
+          "text": "Atlas checks each suggestion before anything runs. If it's allowed, the action happens. If it's blocked, the action stops.",
+          "pause": 3.5
+        },
+        {
+          "id": "n03",
+          "text": "Engineers call this a security check on the server.",
+          "pause": 5
+        }
       ]
     },
     {
-      "id": "s3-flow",
-      "title": "Build the request flow",
+      "id": "p3-see",
+      "title": "See it work",
       "beats": [
-        { "id": "b05", "text": "Let's build the flow, one piece at a time. It starts with you, sending a request.", "pause": 1.6 },
-        { "id": "b06", "text": "The request reaches a model. The model reads it, and may decide that a tool would help.", "pause": 1.8 },
-        { "id": "b07", "text": "When it does, it doesn't run the tool. It produces a proposal: a tool name, and some arguments. That is all the model can do.", "pause": 3.0 },
-        { "id": "b08", "text": "Now the important part. Between that proposal and the tool sits the server. This is trusted code that we wrote, and it makes the decision.", "pause": 3.0 },
-        { "id": "b09", "text": "The server checks the call against policy. If it's allowed, the tool runs on synthetic data. If not, nothing runs. Either way, an event is recorded.", "pause": 3.5 }
+        {
+          "id": "n04",
+          "text": "Reading the project update is allowed. Sending the summary needs your approval, so it waits.",
+          "pause": 3.8
+        },
+        {
+          "id": "n05",
+          "text": "Here, Atlas blocked a plugin that wasn't verified.",
+          "pause": 4
+        }
       ]
     },
     {
-      "id": "s4-offon",
-      "title": "Security off versus on",
+      "id": "p4-approval",
+      "title": "Why approval matters",
       "beats": [
-        { "id": "b10", "text": "Now let's see the difference in the real application. These are scripted scenarios, not the live model, so they behave the same way every time.", "pause": 1.8 },
-        { "id": "b11", "text": "With Security off, a plugin update contains a hidden instruction. The scripted agent follows it, reads a restricted memo, and queues it for an outside address. Nothing is really sent, but nothing stopped it either.", "pause": 3.0 },
-        { "id": "b12", "text": "Now the same request with Security on. The plugin is blocked, because it is unsigned. The agent finishes the task from the verified project record instead.", "pause": 3.0 },
-        { "id": "b13", "text": "A live model might not fall for the hidden instruction at all. That is why the vulnerable behaviour is scripted: it makes the comparison repeatable.", "pause": 3.5 }
+        {
+          "id": "b17",
+          "text": "Some actions are allowed, but only with a human decision. Sending a message to the team is one of them.",
+          "pause": 2
+        },
+        {
+          "id": "n06",
+          "text": "Right now, the action is waiting, not done. Let's say no first, then yes.",
+          "pause": 6.5
+        },
+        {
+          "id": "b20",
+          "text": "And remember, a send here only writes to a simulated outbox. No message ever leaves the application.",
+          "pause": 4
+        }
       ]
     },
     {
-      "id": "s5-boundary",
-      "title": "The decision boundary",
+      "id": "p5-fail",
+      "title": "What if a check fails?",
       "beats": [
-        { "id": "b14", "text": "Now a live request. I'm asking the real model, running on Groq, to read the compensation document, and I claim to be the chief financial officer.", "pause": 2.8 },
-        { "id": "b15", "text": "The model proposes reading that document. The server compares the call with the agent's permissions. The scope for that document is missing, so the call is denied.", "pause": 3.0 },
-        { "id": "b16", "text": "Notice what did not happen. Nobody asked the model to behave. A claim made in the prompt carries no authority, because the decision lives in server code.", "pause": 3.5 }
+        {
+          "id": "n07",
+          "text": "What if a check can't run? Atlas stops safely, and nothing happens.",
+          "pause": 3.8
+        },
+        {
+          "id": "b25",
+          "text": "This was a controlled, simulated failure. It does not prove how the system behaves in a real infrastructure outage.",
+          "pause": 4
+        }
       ]
     },
     {
-      "id": "s6-approval",
-      "title": "Human approval",
+      "id": "p6-remember",
+      "title": "What to remember",
       "beats": [
-        { "id": "b17", "text": "Some actions are allowed, but only with a human decision. Sending a message to the team is one of them.", "pause": 1.4 },
-        { "id": "b18", "text": "The server pauses the action and shows an approval card. Nothing has been sent.", "pause": 2.8 },
-        { "id": "b19", "text": "If I deny, the action is recorded as declined and never runs. If I approve, the server checks that the approval belongs to this session, then re-runs the full set of checks before executing.", "pause": 3.0 },
-        { "id": "b20", "text": "And remember, a send here only writes to a simulated outbox. No message ever leaves the application.", "pause": 3.0 }
-      ]
-    },
-    {
-      "id": "s7-failclosed",
-      "title": "Fail closed and evidence",
-      "beats": [
-        { "id": "b21", "text": "Next, a question about failure. What should happen if the authorization check itself can't complete?", "pause": 1.6 },
-        { "id": "b22", "text": "In this scenario we simulate that outage. With Security on, the system fails closed: if a required check can't finish, the action is denied.", "pause": 2.4 },
-        { "id": "b23", "text": "Without protection, the same outage fails open. That is the weakness the comparison shows.", "pause": 3.0 },
-        { "id": "b24", "text": "In the evidence panel we can see each control, its decision, a reason code, and the matching audit record. The record states what the server decided. It does not depend on what the model said.", "pause": 3.0 },
-        { "id": "b25", "text": "This was a controlled, simulated failure. It does not prove how the system behaves in a real infrastructure outage.", "pause": 3.0 }
-      ]
-    },
-    {
-      "id": "s8-summary",
-      "title": "What has been demonstrated",
-      "beats": [
-        { "id": "b26", "text": "So, what did Atlas demonstrate?", "pause": 1.4 },
-        { "id": "b27", "text": "A model's output is a proposal. Server-side policy decides what executes. Sensitive actions can wait for a person. A failed check must not allow the action. And audit evidence explains what happened.", "pause": 3.5 },
-        { "id": "b28", "text": "What it does not show: this is not a certified product, it has not had an independent penetration test, and prompt-injection detection is only heuristic. On this deployment, approval replay protection and audit are per server instance.", "pause": 3.0 },
-        { "id": "b29", "text": "You can try the live demo and read the code on GitHub. Thanks for watching.", "pause": 3.5 }
+        {
+          "id": "b26",
+          "text": "So, what did Atlas demonstrate?",
+          "pause": 1.8
+        },
+        {
+          "id": "n08",
+          "text": "The AI suggests. Atlas checks. The action is allowed, or blocked.",
+          "pause": 4
+        },
+        {
+          "id": "n09",
+          "text": "Every decision is saved in an activity record.",
+          "pause": 3.2
+        },
+        {
+          "id": "b29",
+          "text": "You can try the live demo and read the code on GitHub. Thanks for watching.",
+          "pause": 5
+        }
       ]
     }
   ]

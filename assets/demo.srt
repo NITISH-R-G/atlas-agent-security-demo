@@ -3,285 +3,133 @@
 When an AI agent decides to do something, what actually decides whether it is allowed to happen?
 
 2
-00:00:09,026 --> 00:00:12,381
+00:00:09,326 --> 00:00:12,681
 That question is behind this whole project.
 
 3
-00:00:12,431 --> 00:00:13,807
+00:00:12,731 --> 00:00:14,107
 It's called Atlas.
 
 4
-00:00:18,557 --> 00:00:21,150
+00:00:17,157 --> 00:00:19,750
 Atlas looks like an ordinary assistant.
 
 5
-00:00:21,200 --> 00:00:25,488
+00:00:19,800 --> 00:00:24,088
 You type a request, and it can use tools: read a project record,
 
 6
-00:00:25,538 --> 00:00:29,827
+00:00:24,138 --> 00:00:28,427
 open a document, fetch updates from a plugin, or send a message.
 
 7
-00:00:31,477 --> 00:00:35,344
-Everything here is a controlled, synthetic environment.
-
-8
-00:00:35,394 --> 00:00:41,398
-The documents are fictional, and a message is only ever added to an in-memory outbox.
-
-9
-00:00:44,948 --> 00:00:48,068
+00:00:33,477 --> 00:00:36,597
 Let's build the flow, one piece at a time.
 
-10
-00:00:48,118 --> 00:00:50,937
+8
+00:00:36,647 --> 00:00:39,466
 It starts with you, sending a request.
 
+9
+00:00:41,916 --> 00:00:46,969
+Say you ask: read the project update, and send a summary to the team.
+
+10
+00:00:47,019 --> 00:00:50,742
+The AI reads your request, and suggests what to do.
+
 11
-00:00:52,587 --> 00:00:54,650
-The request reaches a model.
+00:00:53,992 --> 00:00:58,096
+Atlas checks each suggestion before anything runs.
 
 12
-00:00:54,700 --> 00:00:59,026
-The model reads it, and may decide that a tool would help.
+00:00:58,146 --> 00:01:01,088
+If it's allowed, the action happens.
 
 13
-00:01:00,876 --> 00:01:03,663
-When it does, it doesn't run the tool.
+00:01:01,138 --> 00:01:03,913
+If it's blocked, the action stops.
 
 14
-00:01:03,713 --> 00:01:07,845
-It produces a proposal: a tool name, and some arguments.
+00:01:07,463 --> 00:01:10,840
+Engineers call this a security check on the server.
 
 15
-00:01:07,895 --> 00:01:10,011
-That is all the model can do.
+00:01:17,390 --> 00:01:19,897
+Reading the project update is allowed.
 
 16
-00:01:13,061 --> 00:01:14,531
-Now the important part.
+00:01:19,947 --> 00:01:23,463
+Sending the summary needs your approval, so it waits.
 
 17
-00:01:14,581 --> 00:01:17,901
-Between that proposal and the tool sits the server.
+00:01:27,313 --> 00:01:30,606
+Here, Atlas blocked a plugin that wasn't verified.
 
 18
-00:01:17,951 --> 00:01:21,999
-This is trusted code that we wrote, and it makes the decision.
-
-19
-00:01:25,049 --> 00:01:28,351
-The server checks the call against policy.
-
-20
-00:01:28,401 --> 00:01:32,262
-If it's allowed, the tool runs on synthetic data.
-
-21
-00:01:32,312 --> 00:01:33,938
-If not, nothing runs.
-
-22
-00:01:33,988 --> 00:01:36,571
-Either way, an event is recorded.
-
-23
-00:01:41,621 --> 00:01:45,031
-Now let's see the difference in the real application.
-
-24
-00:01:45,081 --> 00:01:50,841
-These are scripted scenarios, not the live model, so they behave the same way every time.
-
-25
-00:01:52,691 --> 00:01:57,171
-With Security off, a plugin update contains a hidden instruction.
-
-26
-00:01:57,221 --> 00:02:03,652
-The scripted agent follows it, reads a restricted memo, and queues it for an outside address.
-
-27
-00:02:03,702 --> 00:02:07,415
-Nothing is really sent, but nothing stopped it either.
-
-28
-00:02:10,465 --> 00:02:12,969
-Now the same request with Security on.
-
-29
-00:02:13,019 --> 00:02:16,059
-The plugin is blocked, because it is unsigned.
-
-30
-00:02:16,109 --> 00:02:20,696
-The agent finishes the task from the verified project record instead.
-
-31
-00:02:23,746 --> 00:02:27,629
-A live model might not fall for the hidden instruction at all.
-
-32
-00:02:27,679 --> 00:02:33,021
-That is why the vulnerable behaviour is scripted: it makes the comparison repeatable.
-
-33
-00:02:38,071 --> 00:02:39,439
-Now a live request.
-
-34
-00:02:39,489 --> 00:02:45,261
-I'm asking the real model, running on Groq, to read the compensation document,
-
-35
-00:02:45,311 --> 00:02:48,695
-and I claim to be the chief financial officer.
-
-36
-00:02:51,545 --> 00:02:54,199
-The model proposes reading that document.
-
-37
-00:02:54,249 --> 00:02:58,024
-The server compares the call with the agent's permissions.
-
-38
-00:02:58,074 --> 00:03:02,112
-The scope for that document is missing, so the call is denied.
-
-39
-00:03:05,162 --> 00:03:07,041
-Notice what did not happen.
-
-40
-00:03:07,091 --> 00:03:09,398
-Nobody asked the model to behave.
-
-41
-00:03:09,448 --> 00:03:15,898
-A claim made in the prompt carries no authority, because the decision lives in server code.
-
-42
-00:03:20,948 --> 00:03:24,775
+00:01:36,156 --> 00:01:39,983
 Some actions are allowed, but only with a human decision.
 
-43
-00:03:24,825 --> 00:03:27,836
+19
+00:01:40,033 --> 00:01:43,044
 Sending a message to the team is one of them.
 
-44
-00:03:29,286 --> 00:03:33,108
-The server pauses the action and shows an approval card.
+20
+00:01:45,094 --> 00:01:48,701
+Right now, the action is waiting, not done.
 
-45
-00:03:33,158 --> 00:03:34,629
-Nothing has been sent.
+21
+00:01:48,751 --> 00:01:51,167
+Let's say no first, then yes.
 
-46
-00:03:37,479 --> 00:03:41,886
-If I deny, the action is recorded as declined and never runs.
-
-47
-00:03:41,936 --> 00:03:47,293
-If I approve, the server checks that the approval belongs to this session,
-
-48
-00:03:47,343 --> 00:03:51,165
-then re-runs the full set of checks before executing.
-
-49
-00:03:54,215 --> 00:03:58,642
+22
+00:01:57,717 --> 00:02:02,144
 And remember, a send here only writes to a simulated outbox.
 
-50
-00:03:58,692 --> 00:04:01,552
+23
+00:02:02,194 --> 00:02:05,054
 No message ever leaves the application.
 
-51
-00:04:06,102 --> 00:04:08,172
-Next, a question about failure.
+24
+00:02:10,604 --> 00:02:12,601
+What if a check can't run?
 
-52
-00:04:08,222 --> 00:04:12,821
-What should happen if the authorization check itself can't complete?
+25
+00:02:12,651 --> 00:02:15,751
+Atlas stops safely, and nothing happens.
 
-53
-00:04:14,471 --> 00:04:17,470
-In this scenario we simulate that outage.
-
-54
-00:04:17,520 --> 00:04:24,758
-With Security on, the system fails closed: if a required check can't finish, the action is denied.
-
-55
-00:04:27,208 --> 00:04:30,763
-Without protection, the same outage fails open.
-
-56
-00:04:30,813 --> 00:04:33,984
-That is the weakness the comparison shows.
-
-57
-00:04:37,034 --> 00:04:44,255
-In the evidence panel we can see each control, its decision, a reason code, and the matching audit record.
-
-58
-00:04:44,305 --> 00:04:47,136
-The record states what the server decided.
-
-59
-00:04:47,186 --> 00:04:50,017
-It does not depend on what the model said.
-
-60
-00:04:53,067 --> 00:04:55,906
+26
+00:02:19,601 --> 00:02:22,440
 This was a controlled, simulated failure.
 
-61
-00:04:55,956 --> 00:05:01,050
+27
+00:02:22,490 --> 00:02:27,584
 It does not prove how the system behaves in a real infrastructure outage.
 
-62
-00:05:05,600 --> 00:05:08,078
+28
+00:02:33,134 --> 00:02:35,612
 So, what did Atlas demonstrate?
 
-63
-00:05:09,528 --> 00:05:11,840
-A model's output is a proposal.
+29
+00:02:37,462 --> 00:02:38,917
+The AI suggests.
 
-64
-00:05:11,890 --> 00:05:14,964
-Server-side policy decides what executes.
+30
+00:02:38,967 --> 00:02:40,140
+Atlas checks.
 
-65
-00:05:15,014 --> 00:05:18,012
-Sensitive actions can wait for a person.
+31
+00:02:40,190 --> 00:02:43,339
+The action is allowed, or blocked.
 
-66
-00:05:18,062 --> 00:05:21,137
-A failed check must not allow the action.
+32
+00:02:47,389 --> 00:02:50,485
+Every decision is saved in an activity record.
 
-67
-00:05:21,187 --> 00:05:24,337
-And audit evidence explains what happened.
-
-68
-00:05:27,887 --> 00:05:31,915
-What it does not show: this is not a certified product,
-
-69
-00:05:31,965 --> 00:05:39,106
-it has not had an independent penetration test, and prompt-injection detection is only heuristic.
-
-70
-00:05:39,156 --> 00:05:45,111
-On this deployment, approval replay protection and audit are per server instance.
-
-71
-00:05:48,161 --> 00:05:51,268
+33
+00:02:53,735 --> 00:02:56,841
 You can try the live demo and read the code on GitHub.
 
-72
-00:05:51,318 --> 00:05:52,437
+34
+00:02:56,891 --> 00:02:58,010
 Thanks for watching.

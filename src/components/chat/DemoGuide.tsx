@@ -1,7 +1,7 @@
 "use client";
 
 export const DEMO_PROMPT = "Find the latest project updates.";
-export const DEMO_SEND_PROMPT = "Send the project summary to the team.";
+export const DEMO_SEND_PROMPT = "Read the project update and send a summary to the team.";
 
 export interface DemoStage {
   id: "A" | "B" | "C" | "D";

@@ -2,89 +2,64 @@
 
 # Atlas
 
-**A chat assistant that proposes actions, and a server that decides whether they run.**
+**An AI assistant that checks every action before it runs: the AI suggests, Atlas checks, and the action is allowed or blocked.**
 
-A ChatGPT-inspired agent interface for demonstrating what happens when AI actions meet server-side security enforcement.
-
-[![Live demo](https://img.shields.io/badge/live%20demo-atlas--security--demo.vercel.app-0b1020?style=flat-square)](https://atlas-security-demo.vercel.app)
-![Next.js 16](https://img.shields.io/badge/Next.js-16-black?style=flat-square)
-![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178c6?style=flat-square)
-![Tests](https://img.shields.io/badge/tests-355%20passing%20%C2%B7%2011%20live%20skipped-2ea44f?style=flat-square)
-![Data](https://img.shields.io/badge/data-fictional-lightgrey?style=flat-square)
-
-**[Open the live demo](https://atlas-security-demo.vercel.app)** · **[Watch the 6-minute explainer](assets/demo.mp4)** · [Architecture](docs/ARCHITECTURE.md) · [Security model](docs/SECURITY.md) · [Presenter guide](docs/PRESENTER.md)
-
-<a href="assets/demo.mp4"><img src="assets/video-thumbnail.png" alt="Atlas explainer video: a proposal is not permission" width="900"></a>
-
-<sub>Click the image to play the narrated explainer (`assets/demo.mp4`, 5:56, 1080p, captions burned in; also <a href="assets/demo.srt">demo.srt</a>). Real application footage alternates with diagrams drawn step by step.</sub>
+<img src="assets/reference/simple-flow.png" alt="You ask, the AI suggests, Atlas checks, and the action is either allowed or blocked" width="860">
 
 </div>
 
----
+## An example
 
-## The idea
+You type: *"Read the project update and send a summary to the team."*
 
-A language model can **propose** an action. The application must decide whether that action is **allowed**.
+| Step | What Atlas does |
+|---|---|
+| Read the project update | **Allowed.** It happens. |
+| Send the summary | **Needs your approval.** It waits. Deny: nothing is sent. Approve: it is sent to a simulated outbox. |
+| A plugin Atlas has not verified asks for something | **Blocked.** The action stops. |
+| A security check cannot run (simulated) | **Stops safely.** Nothing happens. |
 
-Atlas is an ordinary-looking assistant with tools (read project records and documents, fetch plugin updates, send a message). Every tool call, whoever proposed it, passes one server-side policy pipeline. You can flip a single **Security** switch and ask the same thing again to see the difference, then open **Explore Security** to replay four deterministic scenarios and see exactly why each outcome happened.
+Everything is fictional and every send is simulated. Atlas does not prevent all attacks and does not make AI completely safe: it is an educational demo of the idea, with limits listed [below](#tests-and-limitations).
 
-Everything is fictional and simulated. "Sending" appends to an in-memory outbox; nothing leaves the app.
+## Try it
 
-## What you can do
+**[Open the live demo](https://atlas-security-demo.vercel.app)**, then choose **Explore Security** in the sidebar and run scenario **C** (approval).
 
-- **Chat normally.** Compact tool status under each reply (`✓` allowed, `⏸` approval required, `⊘` denied, `!` unavailable) and one collapsed **Activity** line for details.
-- **Switch Security off and on** and compare. Off is a controlled, fictional weakness; on is server enforcement.
-- **Approve or deny** a held action. Only the server's confirmed result is shown as done.
-- **Explore Security** (separate from the chat): four scenarios, an animated architecture path lit from real events, and a five-step guided tour.
-- **Inspect evidence** on demand: per-control decisions, reason codes and the matching audit record.
-- **Use it on a phone**: the sidebar becomes a drawer and approvals stay reachable.
+## Watch (3 minutes)
 
-Every reply says where it came from: *Scripted demo scenario* (no model), *Model reply · Groq (model)*, or *Built-in assistant*. Scripted scenarios are never presented as live AI, and there is no silent provider fallback.
+<div align="center">
 
-## Security OFF versus ON
+<a href="assets/demo.mp4"><img src="assets/video-thumbnail.png" alt="Atlas explainer video: the AI suggests, Atlas checks" width="860"></a>
 
-| | Security OFF (controlled demo weakness) | Security ON |
-|---|---|---|
-| Untrusted plugin | runs; its hidden instruction is followed by the scripted agent | blocked (trust and provenance) |
-| Restricted documents | readable | denied by identity scope and resource authorization |
-| Sensitive send | runs immediately | held for explicit approval |
-| Output | unfiltered | protected fields withheld |
-| Audit | off | one record per decision |
-| Authorization check fails | fails open (defined weakness) | fails closed |
+<sub>Click to play the narrated video (`assets/demo.mp4`, 3:03, captions burned in; also <a href="assets/demo.srt">demo.srt</a>).</sub>
 
-OFF is not a bypass of platform protections: argument validation, request limits, session binding and the absence of any shell, filesystem or network tool remain.
+</div>
 
-## Guided scenarios
+New here? Read in this order: [Level 1, understand Atlas](docs/01-understand-atlas.md) → [Level 2, see how it works](docs/02-how-it-works.md) → [Level 3, engineering details](docs/03-engineering-details.md).
 
-| | Scenario | What it shows |
-|---|---|---|
-| A | Vulnerable | Security off: plugin used, hidden instruction followed, restricted memo "sent" to an outside address (simulated) |
-| B | Protected | Same request, Security on: plugin blocked, verified record used |
-| C | Approval | A sensitive send waits; deny sends nothing, approve completes a simulated send |
-| D | Fail closed | A simulated authorization outage; the action is denied |
+## Main features
 
-They run through the real server in demo mode, so results are reproducible without a model.
-
-## Screenshots
+- A normal chat assistant with tools, and a **Security** switch to compare a controlled weakness (off) with enforcement (on).
+- **Approval cards** for sensitive actions, with separate Deny and Approve.
+- **Explore Security**: four scripted scenarios, an animated path, and a short guided tour.
+- **Activity details** on demand, and an evidence panel with every check and the saved activity record.
+- Every reply says where it came from: *scripted scenario* (no AI model), *live model (Groq)*, or *built-in assistant*.
+- Works on phones: the sidebar becomes a drawer, and approval buttons stay reachable.
 
 <table>
 <tr>
-<td width="62%"><img src="assets/screenshots/desktop-live-denied.png" alt="Desktop: a live Groq reply with a denied Read document chip"><br><sub>Live Groq reply; the server denied the restricted read.</sub></td>
-<td width="38%"><img src="assets/screenshots/mobile-approval.png" alt="Mobile: approval card with Deny and Approve"><br><sub>Mobile (390 px): approval card.</sub></td>
-</tr>
-<tr>
-<td><img src="assets/screenshots/desktop-tour.png" alt="Guided tour highlighting a blocked tool call"><br><sub>Guided tour highlighting a real blocked call.</sub></td>
-<td><img src="assets/screenshots/mobile-explore.png" alt="Mobile: Explore Security replay"><br><sub>Explore Security on a phone.</sub></td>
+<td width="62%"><img src="assets/screenshots/desktop-live-denied.png" alt="Desktop: a live Groq reply with a denied Read document chip"><br><sub>A live AI reply; Atlas denied the restricted read.</sub></td>
+<td width="38%"><img src="assets/screenshots/mobile-approval.png" alt="Mobile: approval card with Deny and Approve"><br><sub>On a phone: waiting for approval.</sub></td>
 </tr>
 </table>
 
-More: [architecture view](assets/screenshots/desktop-architecture.png) · [mobile drawer](assets/screenshots/mobile-drawer.png) · [tablet](assets/screenshots/tablet-explore.png).
+## Architecture and engineering details
 
-## Architecture
+For engineers: the model only proposes tool calls, and one server-side function checks every call before it runs.
 
-<img src="assets/reference/architecture-overview.png" alt="Atlas system architecture: UI, route handlers, planners, policy pipeline, tools, approvals and audit inside the server trust boundary" width="900">
+<img src="assets/reference/architecture-overview.png" alt="System architecture" width="860">
 
-The model is never the security boundary. Everything inside the dashed line is trusted server code; only the Groq call leaves it. More views, each teaching one idea (editable SVG sources in [docs/architecture](docs/architecture)):
+<details><summary>More diagrams</summary>
 
 | | |
 |---|---|
@@ -93,65 +68,49 @@ The model is never the security boundary. Everything inside the dashed line is t
 | [Security OFF versus ON](assets/reference/security-mode-comparison.png) | the same scripted request, two outcomes |
 | [Fail closed](assets/reference/fail-closed-flow.png) | a check that cannot complete stops the action |
 
-Details and what each diagram confirms: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
+Editable SVG sources: [docs/architecture](docs/architecture).
 
-## Security controls
+</details>
 
-Eleven controls on the server path: least privilege, scoped short-lived credentials, resource-level authorization, tool allowlist, trust and provenance, untrusted-content isolation, injection filtering, approval for sensitive actions, output filtering, audit logging, and fail closed. Each records its decision, reason code and evidence per call. The full contract, including what is only simulated, is in [docs/SECURITY.md](docs/SECURITY.md).
+<details><summary>Security controls and stack</summary>
 
-## Stack
+Eleven server-side controls: least privilege, scoped short-lived credentials, resource-level authorization, tool allowlist, trust and provenance, untrusted-content isolation, injection filtering, approval for sensitive actions, output filtering, audit logging, fail closed. Details: [SECURITY.md](docs/SECURITY.md), [ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
-Next.js 16 (App Router, route handlers, NDJSON streaming), React 19, TypeScript, Vercel AI SDK 7 with Groq (`openai/gpt-oss-120b`), OpenUI for model-authored replies, zod 4, vitest 3 and Testing Library. No database. Hosted on Vercel.
+Stack: Next.js 16, React 19, TypeScript, Vercel AI SDK 7 with Groq (`openai/gpt-oss-120b`), OpenUI, zod 4, vitest 3. No database. Hosted on Vercel.
 
-## Run it locally
+</details>
+
+<details><summary>Run it locally</summary>
 
 ```bash
 npm install
-cp .env.example .env.local     # then set GROQ_API_KEY (a key is optional: scripted scenarios work without one)
+cp .env.example .env.local     # set GROQ_API_KEY if you want live replies; scripted scenarios need no key
 npm run dev                    # http://localhost:3000
 ```
 
-Environment variable **names** (values are never committed):
+Environment variable **names** (values are never committed): `LLM_PROVIDER`, `GROQ_API_KEY`, `GROQ_MODEL`, optional `OPENROUTER_*`, `OPENAI_*`, `NVIDIA_*` (see `.env.example`), `ATLAS_SEAL_SECRET` (signs approval tickets on serverless hosts), `ATLAS_AUDIT_STDOUT`. Without a provider, free-text chat uses the built-in assistant and says so.
 
-| Name | Purpose |
-|---|---|
-| `LLM_PROVIDER` | pins the provider, for example `groq` |
-| `GROQ_API_KEY`, `GROQ_MODEL` | Groq credentials and model id |
-| `OPENROUTER_*`, `OPENAI_*`, `NVIDIA_*` | optional alternative providers (see `.env.example`) |
-| `ATLAS_SEAL_SECRET` | signs approval tickets on serverless hosts |
-| `ATLAS_AUDIT_STDOUT` | log one data-free JSON line per audit decision |
+</details>
 
-Without a configured provider, free-text chat uses the built-in assistant and says so.
-
-## Testing
+## Tests and limitations
 
 ```bash
-npm test            # unit, API, UI and scenario suites
-npm run typecheck
-npm run lint
-npm run build
+npm test && npm run typecheck && npm run lint && npm run build
 npm run test:live   # real provider checks; skipped (not passed) without a key
 ```
 
-At the last run: **355 passed, 11 skipped** (the skipped tests are the live-provider checks and are not counted as passes), type-check, lint and production build clean. Browser checks of the deployed app covered the guided scenarios, approve/deny, a live Groq tool denial, and layouts at 360x800, 390x844, 768x1024, 1024x768 and 1440x900 with no horizontal overflow. See [docs/PRESENTER.md](docs/PRESENTER.md) for the manual demo flow.
+At the last run: **355 passed, 11 skipped** (the skipped tests are live-provider checks and are not counted as passes); type-check, lint and production build clean. Browser checks covered scenarios A to D, approve and deny, a live Groq denial, and layouts at 360, 390, 768, 1024 and 1440 px wide with no horizontal overflow.
 
-**Not verified:** Groq 429 or outage behaviour on the hosted site (an invalid-key failure was verified locally; 429 and timeouts are unit-tested only), use from several physical devices at once, and any load testing.
+**Not verified:** Groq 429 or outage behaviour on the hosted site, use from several devices at once, load.
 
-## Known limitations
+**Limits to know:**
+- Security OFF versus ON is a controlled demonstration, not advice to turn security off in a real application. The vulnerable behaviour is scripted so the comparison is repeatable; a live AI can behave differently.
+- The Security switch is a demo setting, not a login.
+- On the serverless deployment, approval replay protection and the activity record are per server instance, so a replayed approval can repeat a *simulated* send.
+- Not independently penetration tested; not a production security service.
 
-- The Security switch is a demo setting, not authentication. The session is an anonymous cookie.
-- Injection detection is a heuristic; authorization never depends on it. A real model may ignore an injected instruction even with Security off.
-- On the serverless deployment, approvals travel as signed session-bound tickets, but single use, audit records and rate limits are per instance. A replayed ticket can repeat a *simulated* send. A shared store would fix this and has not been added.
-- Educational demo on fictional data. It is not a production security service and has not been penetration tested.
+## Docs
 
-## Video, diagrams and docs
+[Level 1](docs/01-understand-atlas.md) · [Level 2](docs/02-how-it-works.md) · [Level 3](docs/03-engineering-details.md) · [Presenter guide](docs/PRESENTER.md) · [Video production](docs/VIDEO_PRODUCTION.md) · [Presentation context](docs/PRESENTATION_CONTEXT.md) · [Deploying](docs/DEPLOY.md)
 
-- [Explainer video](assets/demo.mp4) (5:56) · [captions](assets/demo.srt) · [production guide: narration, timeline, how to rebuild](docs/VIDEO_PRODUCTION.md) (the pipeline in [`video/`](video); narration by ElevenLabs, free plan)
-- [Architecture](docs/ARCHITECTURE.md) · [diagram sources and exports](docs/architecture) · [reference images](assets/reference) · [presentation context](docs/PRESENTATION_CONTEXT.md)
-- [Security model](docs/SECURITY.md) · [Presenter guide](docs/PRESENTER.md) · [Deploying](docs/DEPLOY.md) · [Reference analysis](docs/REFERENCE-ANALYSIS.md)
-
-## Development
-
-Run the checks above before opening a change. Keep tool authorization, approvals, output filtering and audit on the server, keep resources synthetic, and do not add real network, filesystem or shell tools. Atlas is not affiliated with OpenAI; the interface only follows common chat conventions.
-
-No license has been selected for this repository yet.
+Atlas is not affiliated with OpenAI; the interface only follows common chat conventions. No license has been selected for this repository yet.

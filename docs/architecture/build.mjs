@@ -33,12 +33,12 @@ class Diagram {
   boundary(id, x, y, w, h, label, step) {
     this.parts.push(`<g data-id="${id}" data-step="${step}"><rect x="${x}" y="${y}" width="${w}" height="${h}" rx="26" class="boundary"/><text x="${x + 24}" y="${y + 34}" class="blabel">${esc(label)}</text></g>`);
   }
-  node(id, x, y, w, h, title, lines, kind, step, badge) {
+  node(id, x, y, w, h, title, lines, kind, step, badge, lg) {
     this.nodes.set(id, { x, y, w, h });
     const c = COLORS[kind];
-    const sub = (lines ?? []).map((l, i) => `<text x="${x + 18}" y="${y + 62 + i * 25}" class="sub" fill="${c.ink}">${esc(l)}</text>`).join("");
+    const sub = (lines ?? []).map((l, i) => `<text x="${x + 18}" y="${lg ? y + 84 + i * 34 : y + 62 + i * 25}" class="sub" fill="${c.ink}"${lg ? ' font-size="27"' : ""}>${esc(l)}</text>`).join("");
     const b = badge ? `<text x="${x + 6}" y="${y - 12}" class="badge" fill="${c.stroke}">${esc(badge)}</text>` : "";
-    this.parts.push(`<g data-id="${id}" data-step="${step}"><rect x="${x}" y="${y}" width="${w}" height="${h}" rx="16" fill="${c.fill}" stroke="${c.stroke}" stroke-width="2.5"/><text x="${x + 18}" y="${lines && lines.length ? y + 34 : y + h / 2 + 9}" class="ttl" fill="${c.ink}">${esc(title)}</text>${sub}${b}</g>`);
+    this.parts.push(`<g data-id="${id}" data-step="${step}"><rect x="${x}" y="${y}" width="${w}" height="${h}" rx="16" fill="${c.fill}" stroke="${c.stroke}" stroke-width="2.5"/><text x="${x + 18}" y="${lines && lines.length ? (lg ? y + 46 : y + 34) : y + h / 2 + 9}" class="ttl" fill="${c.ink}"${lg ? ' font-size="38"' : ""}>${esc(title)}</text>${sub}${b}</g>`);
   }
   point(id, side) {
     const n = this.nodes.get(id);
@@ -226,6 +226,41 @@ const out = {};
   d.edge("e6", "fc", "b", "audit", "t", 6, { kind: "allow", dashed: true, elbow: "v", mid: 480 });
   d.note("n1", 50, 748, "A controlled, simulated failure. With Security OFF the same outage fails open: that is the defined weakness.", 6, "server", "start", 24);
   out.E = d;
+}
+
+/* ---------------- F: the simple flow (beginner) ---------------- */
+{
+  const d = new Diagram("simple-flow", "The AI suggests. Atlas checks.", "If the action is allowed, it happens. If it is blocked, it stops.");
+  d.node("you", 60, 330, 300, 170, "You", ["ask for something"], "neutral", 1, undefined, true);
+  d.note("ask", 60, 270, ["“Read the project update and send a summary to the team.”"], 2, "neutral", "start", 22);
+  d.node("ai", 520, 330, 300, 170, "AI", ["suggests what to do"], "model", 3, undefined, true);
+  d.node("atlas", 980, 330, 300, 170, "Atlas checks", ["before anything runs"], "server", 5, undefined, true);
+  d.node("allowed", 1360, 190, 200, 130, "Allowed", ["action happens"], "allow", 6, undefined, true);
+  d.node("blocked", 1360, 510, 200, 130, "Blocked", ["action stops"], "deny", 7, undefined, true);
+  d.node("record", 980, 600, 300, 110, "Activity record", ["every decision saved"], "muted", 9, undefined, false);
+  d.edge("e1", "you", "r", "ai", "l", 3, { kind: "neutral" });
+  d.edge("e2", "ai", "r", "atlas", "l", 5, { kind: "model", label: "suggestion", lx: 900, ly: 400 });
+  d.edge("e3", "atlas", "r", "allowed", "l", 6, { kind: "allow", elbow: "h", mid: 1320 });
+  d.edge("e4", "atlas", "r", "blocked", "l", 7, { kind: "deny", elbow: "h", mid: 1320 });
+  d.edge("e5", "atlas", "b", "record", "t", 9, { kind: "muted", dashed: true });
+  d.note("term", 980, 308, ["a security check on the server"], 8, "server", "start", 20);
+  out.F = d;
+}
+
+/* ---------------- G: stop safely when a check fails ---------------- */
+{
+  const d = new Diagram("safe-stop", "If a check cannot run, Atlas stops safely", "A simulated failure in the demo, not a real outage.");
+  d.node("you", 60, 330, 300, 170, "You", ["ask for something"], "neutral", 1, undefined, true);
+  d.node("ai", 520, 330, 300, 170, "AI", ["suggests what to do"], "model", 2, undefined, true);
+  d.node("atlas", 980, 330, 300, 170, "Atlas checks", ["needs an answer"], "server", 3, undefined, true);
+  d.node("down", 980, 600, 300, 110, "Check unavailable", ["simulated failure"], "deny", 4, undefined, false);
+  d.node("stop", 1360, 330, 200, 170, "Stops", ["nothing happens"], "deny", 5, undefined, true);
+  d.edge("e1", "you", "r", "ai", "l", 2, { kind: "neutral" });
+  d.edge("e2", "ai", "r", "atlas", "l", 3, { kind: "model", label: "suggestion", lx: 900, ly: 400 });
+  d.edge("e3", "atlas", "b", "down", "t", 4, { kind: "deny" });
+  d.edge("e4", "atlas", "r", "stop", "l", 5, { kind: "deny" });
+  d.note("n1", 60, 748, "Safe default: if Atlas cannot check, the action does not run.", 5, "server", "start", 26);
+  out.G = d;
 }
 
 for (const d of Object.values(out)) writeFileSync(join(HERE, `${d.id}.svg`), d.svg());

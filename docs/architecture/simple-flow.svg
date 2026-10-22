@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" width="1600" height="900" role="img" aria-label="The AI suggests. Atlas checks.. If the action is allowed, it happens. If it is blocked, it stops.">
+<title>The AI suggests. Atlas checks.</title>
+<desc>If the action is allowed, it happens. If it is blocked, it stops.</desc>
+<defs><marker id="arrow-neutral" viewBox="0 0 10 10" refX="8" refY="5" markerUnits="userSpaceOnUse" markerWidth="16" markerHeight="16" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#8b95ad"/></marker><marker id="arrow-model" viewBox="0 0 10 10" refX="8" refY="5" markerUnits="userSpaceOnUse" markerWidth="16" markerHeight="16" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#1b9ccf"/></marker><marker id="arrow-tool" viewBox="0 0 10 10" refX="8" refY="5" markerUnits="userSpaceOnUse" markerWidth="16" markerHeight="16" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#1b9ccf"/></marker><marker id="arrow-allow" viewBox="0 0 10 10" refX="8" refY="5" markerUnits="userSpaceOnUse" markerWidth="16" markerHeight="16" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#1f9d57"/></marker><marker id="arrow-deny" viewBox="0 0 10 10" refX="8" refY="5" markerUnits="userSpaceOnUse" markerWidth="16" markerHeight="16" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#d93a35"/></marker><marker id="arrow-pending" viewBox="0 0 10 10" refX="8" refY="5" markerUnits="userSpaceOnUse" markerWidth="16" markerHeight="16" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#d98a00"/></marker><marker id="arrow-server" viewBox="0 0 10 10" refX="8" refY="5" markerUnits="userSpaceOnUse" markerWidth="16" markerHeight="16" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#4a5be0"/></marker><marker id="arrow-muted" viewBox="0 0 10 10" refX="8" refY="5" markerUnits="userSpaceOnUse" markerWidth="16" markerHeight="16" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#c3c9d6"/></marker><style>
+  text{font-family:Inter,"Segoe UI",system-ui,sans-serif}
+  .bg{fill:#fbfcfe}
+  .h1{font-size:44px;font-weight:700;fill:#121a30;letter-spacing:-0.5px}
+  .h2{font-size:24px;fill:#5b6579}
+  .ttl{font-size:25px;font-weight:700}
+  .sub{font-size:19px}
+  .badge{font-size:15px;font-weight:700;letter-spacing:.8px}
+  .note{font-weight:600}
+  .boundary{fill:rgba(74,91,224,.045);stroke:#4a5be0;stroke-width:3;stroke-dasharray:14 10}
+  .blabel{font-size:17px;font-weight:700;letter-spacing:2px;fill:#3a49c8}
+  .edge{fill:none;stroke-width:3.5;stroke-linejoin:round}
+  .edge.dashed{stroke-dasharray:10 8}
+  .lbg{fill:#fbfcfe;stroke:#dfe3ec}
+  .elabel{font-size:17px;font-weight:600}
+</style></defs>
+<rect class="bg" width="1600" height="900"/>
+<text x="60" y="78" class="h1">The AI suggests. Atlas checks.</text>
+<text x="60" y="118" class="h2">If the action is allowed, it happens. If it is blocked, it stops.</text>
+<g data-id="you" data-step="1"><rect x="60" y="330" width="300" height="170" rx="16" fill="#f3f5fa" stroke="#8b95ad" stroke-width="2.5"/><text x="78" y="376" class="ttl" fill="#1b2338" font-size="38">You</text><text x="78" y="414" class="sub" fill="#1b2338" font-size="27">ask for something</text></g>
+<g data-id="ask" data-step="2"><text x="60" y="270" class="note" font-size="22" text-anchor="start" fill="#1b2338">“Read the project update and send a summary to the team.”</text></g>
+<g data-id="ai" data-step="3"><rect x="520" y="330" width="300" height="170" rx="16" fill="#e7f6fc" stroke="#1b9ccf" stroke-width="2.5"/><text x="538" y="376" class="ttl" fill="#0c4a66" font-size="38">AI</text><text x="538" y="414" class="sub" fill="#0c4a66" font-size="27">suggests what to do</text></g>
+<g data-id="atlas" data-step="5"><rect x="980" y="330" width="300" height="170" rx="16" fill="#eef1ff" stroke="#4a5be0" stroke-width="2.5"/><text x="998" y="376" class="ttl" fill="#1e2a8c" font-size="38">Atlas checks</text><text x="998" y="414" class="sub" fill="#1e2a8c" font-size="27">before anything runs</text></g>
+<g data-id="allowed" data-step="6"><rect x="1360" y="190" width="200" height="130" rx="16" fill="#e6f6ec" stroke="#1f9d57" stroke-width="2.5"/><text x="1378" y="236" class="ttl" fill="#0d5a31" font-size="38">Allowed</text><text x="1378" y="274" class="sub" fill="#0d5a31" font-size="27">action happens</text></g>
+<g data-id="blocked" data-step="7"><rect x="1360" y="510" width="200" height="130" rx="16" fill="#fdeceb" stroke="#d93a35" stroke-width="2.5"/><text x="1378" y="556" class="ttl" fill="#7d1b18" font-size="38">Blocked</text><text x="1378" y="594" class="sub" fill="#7d1b18" font-size="27">action stops</text></g>
+<g data-id="record" data-step="9"><rect x="980" y="600" width="300" height="110" rx="16" fill="#f6f7f9" stroke="#c3c9d6" stroke-width="2.5"/><text x="998" y="634" class="ttl" fill="#6b7385">Activity record</text><text x="998" y="662" class="sub" fill="#6b7385">every decision saved</text></g>
+<g data-id="e1" data-step="3"><path d="M360 415 L520 415" pathLength="1" class="edge" stroke="#8b95ad" marker-end="url(#arrow-neutral)"/></g>
+<g data-id="e2" data-step="5"><path d="M820 415 L980 415" pathLength="1" class="edge" stroke="#1b9ccf" marker-end="url(#arrow-model)"/><rect x="835.5" y="378" width="129" height="32" rx="16" class="lbg"/><text x="900" y="400" class="elabel" text-anchor="middle" fill="#0c4a66">suggestion</text></g>
+<g data-id="e3" data-step="6"><path d="M1280 415 L1320 415 L1320 255 L1360 255" pathLength="1" class="edge" stroke="#1f9d57" marker-end="url(#arrow-allow)"/></g>
+<g data-id="e4" data-step="7"><path d="M1280 415 L1320 415 L1320 575 L1360 575" pathLength="1" class="edge" stroke="#d93a35" marker-end="url(#arrow-deny)"/></g>
+<g data-id="e5" data-step="9"><path d="M1130 500 L1130 600" pathLength="1" class="edge dashed" stroke="#c3c9d6" marker-end="url(#arrow-muted)"/></g>
+<g data-id="term" data-step="8"><text x="980" y="308" class="note" font-size="20" text-anchor="start" fill="#1e2a8c">a security check on the server</text></g>
+</svg>

@@ -23,5 +23,15 @@
     "key": "E",
     "title": "Fail closed",
     "subtitle": "If a required check cannot complete, the action does not run."
+  },
+  "simple-flow": {
+    "key": "F",
+    "title": "The AI suggests. Atlas checks.",
+    "subtitle": "If the action is allowed, it happens. If it is blocked, it stops."
+  },
+  "safe-stop": {
+    "key": "G",
+    "title": "If a check cannot run, Atlas stops safely",
+    "subtitle": "A simulated failure in the demo, not a real outage."
   }
 }

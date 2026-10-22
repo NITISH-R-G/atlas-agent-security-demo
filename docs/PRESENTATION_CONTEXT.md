@@ -2,6 +2,12 @@
 
 Technical context for building a slide deck about Atlas. Everything here is taken from the repository, the deployed app and the recorded tests. Where something is conceptual, it says so. Do not add architecture details that are not in this document.
 
+## Plain-language story (use this first)
+
+**The AI suggests an action. Atlas checks whether it is allowed. If it is not allowed, the action does not happen.** Anchor example: "Read the project update and send a summary to the team." Reading is allowed; sending needs approval and waits; the person denies or approves; Atlas shows the real result. A plugin Atlas has not verified is blocked. If a check cannot run, Atlas stops safely (simulated here). Every decision is saved in an activity record. Reference image: `assets/reference/simple-flow.png` (and `safe-stop.png`). Use the plain terms with a general audience and the technical terms below with engineers: AI suggestion = model-proposed tool call; security check = server-side policy enforcement; needs your approval = approval gate; stops safely = fail closed; activity record = audit event.
+
+The engineering sections below are for deeper slides.
+
 ## Overview
 
 Atlas is a chat assistant with tools (read a project record, open a document, fetch plugin updates, send a message) running on fictional data. Every tool call, whoever proposed it, passes one server-side policy pipeline. A single **Security** switch compares a controlled, deliberately vulnerable mode (OFF) with server enforcement (ON). Four scripted scenarios, a guided tour, an animated architecture view and an evidence panel make the decisions inspectable. It is an educational demo, deployed at https://atlas-security-demo.vercel.app, source at https://github.com/NITISH-R-G/atlas-agent-security-demo.
@@ -96,8 +102,8 @@ Question, then what Atlas is, then the request flow built piece by piece, then O
 
 | # | Slide | Message | Image |
 |---|---|---|---|
-| 1 | Title | A proposal is not permission | `video-thumbnail.png` |
-| 2 | The question | When an agent acts, what decides whether it may? | none (large text) |
+| 1 | Title | The AI suggests. Atlas checks. | `video-thumbnail.png` |
+| 2 | The simple idea | You ask, the AI suggests, Atlas checks, allowed or blocked | `simple-flow.png` |
 | 3 | What Atlas is | A normal assistant on fictional data, with tools | `atlas-product-desktop.png` |
 | 4 | Request flow | The model proposes; the server decides | `request-lifecycle.png` |
 | 5 | System view | Everything inside the boundary is trusted server code | `architecture-overview.png` |
@@ -122,7 +128,9 @@ Question, then what Atlas is, then the request flow built piece by piece, then O
 | `approval-lifecycle.png` | Parked, ticket, decision, validation, outcome | SVG source |
 | `security-mode-comparison.png` | OFF versus ON outcomes | SVG source |
 | `fail-closed-flow.png` | Authorization unavailable stops the action | SVG source |
-| `../video-thumbnail.png` | Video cover | designed card using the lifecycle diagram |
+| `simple-flow.png` | The beginner diagram: You, AI, Atlas checks, Allowed or Blocked | SVG source `docs/architecture/simple-flow.svg` |
+| `safe-stop.png` | A check that cannot run stops the action (simulated) | SVG source `docs/architecture/safe-stop.svg` |
+| `../video-thumbnail.png` | Video cover | designed card using the simple diagram |
 
 All are 16:9 (1920 x 1080). Editable sources and 4K exports are in `docs/architecture/`.
 

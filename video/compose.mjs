@@ -10,7 +10,7 @@ import { beats, captionEvents, TEMPO, TOTAL } from "./timeline.mjs";
 
 const dest = resolve(process.argv[2] ?? join(ROOT, "..", "assets"));
 mkdirSync(dest, { recursive: true });
-const ORDER = ["s1", "s2", "s3", "s4a", "s4b", "s5a", "s5b", "s6a", "s6b", "s6c", "s7a", "s7b", "s8a", "s8b", "s8c"];
+const ORDER = ["h1", "h2", "d1", "c1", "c2", "a1", "f1", "r1", "r2"];
 
 const run = (bin, args) => {
   const r = spawnSync(bin, args, { encoding: "utf8", maxBuffer: 1 << 26 });
