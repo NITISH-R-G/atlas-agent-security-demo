@@ -58,6 +58,8 @@ export interface ToolOutcome {
   latencyMs: number;
   /** Per-control evaluations that actually ran for this call, in order. */
   evals: ControlEval[];
+  /** The permission the call needs (for example records:export), derived from the tool definition and validated arguments. */
+  action?: string;
   /** Who the action ran as: the configured user and the privilege level this profile gives the agent. */
   principal: string;
   /** Where the tool comes from and how far it is trusted (server configuration, never the model's claim). */
@@ -406,12 +408,23 @@ export function sourceLabel(tool: string): string {
   return p.signed && p.pinned && p.publisherVerified ? "first-party tool, verified" : "third-party plugin, unsigned and unverified";
 }
 
+/** The permission a call needs, from the server's tool definition. Never taken from the model's description of the call. */
+export function actionLabel(call: ToolCall): string | undefined {
+  const def = Object.hasOwn(TOOLS, call.tool) ? TOOLS[call.tool] : undefined;
+  if (!def) return undefined;
+  try {
+    return def.scope(call.args && typeof call.args === "object" ? (call.args as Record<string, unknown>) : {});
+  } catch {
+    return undefined;
+  }
+}
+
 export async function executeTool(ctx: Context, call: ToolCall): Promise<ToolOutcome> {
   const evals: ControlEval[] = [];
   const base = { callId: call.id, tool: call.tool, redactions: 0, notices: [] as string[], untrustedOutput: false, latencyMs: 0, evals };
   const finish = (o: Omit<ToolOutcome, keyof typeof base | "notices" | "principal" | "source"> & { notices?: string[] } & Partial<typeof base>): ToolOutcome => {
     evals.push(ctx.policy.audit ? evalOf("audit", "allowed", "recorded", "Decision recorded in the in-memory server audit log.", "documented") : off("audit"));
-    const out: ToolOutcome = { ...base, ...o, notices: o.notices ?? [], principal: principalLabel(ctx), source: sourceLabel(call.tool) };
+    const out: ToolOutcome = { ...base, ...o, notices: o.notices ?? [], principal: principalLabel(ctx), source: sourceLabel(call.tool), action: actionLabel(call) };
     if (ctx.policy.audit) {
       ctx.audit.push({ at: ctx.now(), tool: out.tool, target: out.target, decision: out.decision, layer: out.layer });
       recordAudit({ at: ctx.now(), callId: out.callId, tool: out.tool, target: out.target, decision: out.decision, layer: out.layer, source: ctx.source });

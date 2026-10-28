@@ -18,6 +18,7 @@ export interface WalkStep {
   /** For tool steps: who the action ran as, and where the tool comes from. */
   principal?: string;
   source?: string;
+  action?: string;
   /** For blocked tool calls: the reason shown by "Why was this blocked?". */
   why?: string;
   /** The control that prevented the action, if any. */
@@ -74,6 +75,7 @@ export function buildWalkthrough(m: AssistantMessage): WalkStep[] {
         evals,
         principal: v.principal,
         source: v.source,
+        action: v.action,
         why: v.status === "ok" ? undefined : v.reason,
         blockedBy: blockedEval ? CONTROL_INFO[blockedEval.control].name : v.decision === "invalid" ? "Argument validation (platform)" : undefined,
         notEvaluated: stopped ? PIPELINE.filter((c) => !reached.has(c)).map((c) => CONTROL_INFO[c].name) : undefined,

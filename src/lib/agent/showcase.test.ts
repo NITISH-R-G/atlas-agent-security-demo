@@ -159,14 +159,14 @@ describe("agentic supply chain: the Atlas Sync plugin", () => {
 });
 
 describe("routing: access decisions never depend on model wording", () => {
-  it("with a model configured, access and plugin requests still use the server's rule-based planner", async () => {
+  it("with a model configured, the prepared prompts still use the constrained rule-based path", async () => {
     process.env.LLM_PROVIDER = "groq";
     process.env.GROQ_API_KEY = "gsk_test_key_value_should_never_appear";
     const fetchSpy = vi.fn(async () => {
       throw new Error("the model must not be called for this request");
     });
     vi.stubGlobal("fetch", fetchSpy);
-    for (const prompt of ["Show me the Nightingale budget.", "Export the customer records.", "Find the latest project updates.", "Why was that denied?"]) {
+    for (const prompt of ["Show me the Project Nightingale budget.", "Export the customer records.", "Find the latest project updates.", "Why was that denied?"]) {
       const r = await chat(prompt, true);
       expect(r.model).toMatchObject({ engine: "scripted", label: "Rule-based reply (no language model)" });
     }

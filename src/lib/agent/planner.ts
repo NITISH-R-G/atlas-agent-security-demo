@@ -24,6 +24,7 @@ export interface ToolView {
   evals: ControlEval[];
   principal: string;
   source: string;
+  action?: string;
 }
 
 export type AgentEvent =
@@ -53,6 +54,7 @@ export const toView = (o: ToolOutcome): ToolView => ({
   evals: o.evals,
   principal: o.principal,
   source: o.source,
+  action: o.action,
 });
 
 /* ------------------------------------------------------------------ */
@@ -63,6 +65,7 @@ export type Intent =
   | "secrets"
   | "restricted_lookup"
   | "export_request"
+  | "status_then_export"
   | "explain"
   | "send_summary"
   | "review_files"
@@ -76,9 +79,6 @@ export type Intent =
 /** Requests to reveal the system prompt, credentials, environment or configuration. The assistant has no access to any of these. */
 const SECRETS_ASK =
   /(reveal|show|print|dump|display|leak|share|tell me|give me|what('| i)?s|what is|expose|output|list|repeat)\b[^.?!]{0,60}\b(system prompt|hidden instructions?|your (instructions|configuration|config|secrets?|credentials?|api[ -]?keys?|keys|environment|env\b)|environment variables?|process\.env|api[ -]?keys?\b[^.?!]{0,20}\byou\b)/;
-
-/** Requests the rule-based planner always handles: the outcome is decided by the server policy, never by a model's wording. */
-export const POLICY_INTENTS: ReadonlySet<Intent> = new Set<Intent>(["restricted_lookup", "export_request", "latest_updates", "send_summary", "review_files", "explain"]);
 
 const ROLE_CLAIM = /(i am|i'm|as|acting as|speaking as)\s+(the\s+|an?\s+)?(admin|administrator|ceo|cfo|owner|executive|manager|security|root|superuser)|admin(istrator)?\s+(mode|override|access|privileges?)|\b(authori[sz]ed|elevated|sudo|override|grant me)\b/;
 export const claimsPrivilege = (message: string) => ROLE_CLAIM.test(message.normalize("NFKC").toLowerCase());
@@ -163,6 +163,8 @@ export interface RunOptions {
   now?: () => number;
   runId?: string;
   ctx?: Context;
+  /** A prepared prompt's intent. Without it the built-in assistant classifies the message itself. */
+  intent?: Intent;
 }
 
 export interface RunResult {
@@ -179,7 +181,7 @@ function deniedBlocks(o: ToolOutcome, what: string, claimed: boolean): Block[] {
       kind: "p",
       text: approval
         ? `Approval required: ${what} needs a person to confirm it. Nothing was shared.`
-        : `Access denied. Resource access restricted: ${what} is limited to teams that ${USER.name} (a Lighthouse project member) is not part of.`,
+        : `Access denied. Resource access restricted: access to ${what} is limited to teams that ${USER.name} (a Lighthouse project member) is not part of.`,
     },
   ];
   if (claimed && !approval) lines.push({ kind: "p", text: "Saying you are an administrator doesn't change this. Permissions come from the signed-in user on the server, not from the conversation, and approval cannot replace a missing permission." });
@@ -269,7 +271,7 @@ export async function runAgent(opts: RunOptions): Promise<RunResult> {
     return { intent, outcomes, ctx, answer };
   };
 
-  const intent = classify(message);
+  const intent = opts.intent ?? classify(message);
   const failed = (blocks: Block[]) => finish(blocks);
 
   try {
@@ -375,6 +377,23 @@ export async function runAgent(opts: RunOptions): Promise<RunResult> {
         }
         if (o.status === "pending") return finish([{ kind: "p", text: "Approval required: a customer export needs a person to confirm it. Nothing has been exported." }]);
         return finish(deniedBlocks(o, "the customer records", claimsPrivilege(message)));
+      }
+
+      case "status_then_export": {
+        // Each step is proposed and authorized on its own: a permitted read grants nothing to the export.
+        const s = await call("get_project", { id: CURRENT_PROJECT });
+        const f = s.status === "ok" ? fieldsOf(s) : undefined;
+        const e = await call("export_records", { ids: ["cust-001"] }, "cust-001");
+        const blocks: Block[] = [];
+        if (f) blocks.push({ kind: "report", title: `${titleOf(s)}: ${f.status}`, points: [f.summary, `Next milestone: ${f.nextMilestone}`, `Risk: ${f.risks}`] });
+        else blocks.push({ kind: "p", text: "I couldn't retrieve the project record just now." });
+        if (e.status === "ok") {
+          const recs = (e.data as { records?: { fields?: Record<string, string>; title?: string }[] } | undefined)?.records ?? [];
+          blocks.push({ kind: "p", text: `The export ran. This profile gave the agent a broad token and never compared ${USER.name}'s team with the customer-record audience.` });
+          for (const r of recs) blocks.push({ kind: "table", title: String(r.title ?? "Customer record"), columns: ["Field", "Value"], rows: Object.entries(r.fields ?? {}).map(([k, v]) => [k, v]) });
+        } else if (e.status === "pending") blocks.push({ kind: "p", text: "Approval required: a customer export needs a person to confirm it. Nothing has been exported." });
+        else blocks.push(...deniedBlocks(e, "the customer records", false).slice(0, 1));
+        return finish(blocks);
       }
 
       case "explain": {

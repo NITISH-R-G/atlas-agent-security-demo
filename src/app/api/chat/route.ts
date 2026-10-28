@@ -1,8 +1,9 @@
+import { matchPrepared } from "@/lib/agent/prepared";
 import { peekPending } from "@/lib/agent/approvals";
 import { sealCall } from "@/lib/agent/seal";
 import { setAuditStdout } from "@/lib/agent/audit";
 import { runModel } from "@/lib/agent/orchestrator";
-import { classify, POLICY_INTENTS, runAgent, type AgentEvent } from "@/lib/agent/planner";
+import { classify, runAgent, type AgentEvent } from "@/lib/agent/planner";
 import { policyFor } from "@/lib/agent/policy";
 import { readModelConfig } from "@/lib/agent/provider";
 import { parseChatRequest } from "@/lib/agent/request";
@@ -59,8 +60,10 @@ export async function POST(req: Request) {
   const config = readModelConfig(process.env);
   const intent = classify(message);
   const secretsAsk = intent === "secrets";
-  // Access and plugin-trust requests are always decided by the server's rule-based planner, so the enforcement result never depends on a model's wording.
-  const policyRoute = POLICY_INTENTS.has(intent);
+  // Only the explicit prepared prompts take the constrained rule-based path. Everything else is interpreted by the live
+  // model, and every action it proposes is enforced by the same server-side runtime.
+  const prepared = matchPrepared(message);
+  const policyRoute = prepared !== undefined;
   const useModel = !demo && config.ok && !secretsAsk && !policyRoute;
   ctx.sid = sid;
   ctx.source = demo ? "scripted" : useModel ? "model" : "builtin";
@@ -91,7 +94,7 @@ export async function POST(req: Request) {
             label: demo || policyRoute ? "Rule-based reply (no language model)" : secretsAsk ? "Built-in assistant (credential and configuration requests never reach the model)" : "Built-in assistant (no language model configured)",
             note: demo || policyRoute ? "This answer is produced by fixed rules applied to the server's access policy; no language model was called." : secretsAsk ? "This request was answered without calling any model." : config.ok ? undefined : config.message,
           });
-          await runAgent({ message, policy, emit, signal: req.signal, ctx });
+          await runAgent({ message, policy, emit, signal: req.signal, ctx, intent: prepared });
         }
       } catch {
         emit({ type: "error", message: "The assistant hit an error. No sensitive action was completed." });

@@ -59,6 +59,12 @@ export default function Walkthrough({ message, onClose }: { message: AssistantMe
               <p className="wt-text">{selected.detail}</p>
               {selected.principal ? (
                 <dl className="tl-detail">
+                  {selected.action ? (
+                    <>
+                      <dt>Permission needed</dt>
+                      <dd>{selected.action}</dd>
+                    </>
+                  ) : null}
                   <dt>Acting as</dt>
                   <dd>{selected.principal}</dd>
                   <dt>Tool source</dt>

@@ -112,6 +112,12 @@ function Activity({ m, onEvidence }: { m: AssistantMessage; onEvidence: (id: str
                     {t.tool}
                     {t.target !== "-" ? ` on ${t.target}` : ""}
                   </dd>
+                  {t.action ? (
+                    <>
+                      <dt>Permission needed</dt>
+                      <dd>{t.action}</dd>
+                    </>
+                  ) : null}
                   <dt>Acting as</dt>
                   <dd>{t.principal}</dd>
                   <dt>Tool source</dt>

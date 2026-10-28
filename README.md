@@ -54,7 +54,7 @@ Everything runs on fictional data and messages go to an in-memory outbox: nothin
 
 ## Two access stories
 
-Both are reached by typing in the normal message box; the server decides each result from the Security setting and the configured user, never from the message text.
+Both are reached by typing in the normal message box. A live model interprets unfamiliar wording and proposes tool calls; the server decides each result from the Security setting and the configured user, never from the message text or the model.
 
 | Story | Security on | Security off |
 |---|---|---|
@@ -102,12 +102,12 @@ npm test && npm run typecheck && npm run lint && npm run build
 npm run test:live   # real provider checks; skipped (not passed) without a key
 ```
 
-Last run: **424 passed, 11 skipped**. The skipped tests are live-provider checks and are not counted as passes. Type-check, lint and production build were clean. The [security coverage matrix](docs/SECURITY-COVERAGE.md) maps each AI security issue to its implementation and tests, including the defect found and fixed in the last review (whitespace padding could hide an injection phrase from the heuristic detector).
+Last run: **510 passed, 12 skipped**. The skipped tests are live-provider checks and are not counted as passes. Type-check, lint and production build were clean. The [security coverage matrix](docs/SECURITY-COVERAGE.md) maps each AI security issue to its implementation and tests, including the defect found and fixed in the last review (whitespace padding could hide an injection phrase from the heuristic detector).
 
 **Not verified:** Groq rate-limit or outage behaviour on the hosted site, use from several devices at once, load.
 
 **Limits to know:**
-- Access and plugin requests are answered by the server's fixed rules so they repeat exactly; a live model can behave differently for other requests.
+- Ten prepared prompts use a constrained rule path so they repeat exactly; every other request goes to the live model, which may pick different tools or wording. Its calls are enforced by the same server runtime ([routing audit](docs/ROUTING-AUDIT.md)).
 - On the serverless deployment, approval single use, the activity record and rate limits are **per server instance**, so a replayed approval can repeat a *simulated* send. A shared store would fix this and has not been added.
 - Injection detection is a heuristic and misses paraphrases; authorization never depends on it.
 - Atlas does not stop every attack, and has not been independently penetration tested. It is not a production security service.
