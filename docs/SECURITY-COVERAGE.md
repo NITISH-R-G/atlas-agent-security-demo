@@ -1,6 +1,6 @@
 # Security coverage matrix
 
-What each AI security issue is, what Atlas is meant to do about it, where it is implemented, which tests exercise it, and the result of the last run (402 passed, 11 live-provider tests skipped; skipped tests are not counted as passes). File names are under `src/lib/agent/` unless noted.
+What each AI security issue is, what Atlas is meant to do about it, where it is implemented, which tests exercise it, and the result of the last run (417 passed, 11 live-provider tests skipped; skipped tests are not counted as passes). File names are under `src/lib/agent/` unless noted.
 
 **Scope:** controlled, synthetic scenarios. This matrix is a record of what was tested, not a claim that every attack is prevented, and the project has not been independently penetration tested.
 

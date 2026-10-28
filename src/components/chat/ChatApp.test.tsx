@@ -84,7 +84,7 @@ describe("same request, two modes (real server handlers)", () => {
     await user.click(screen.getByRole("button", { name: "Find the latest project updates." }));
     await settled();
     const chips = within(lastAssistant()).getByRole("list", { name: "Tool activity" });
-    expect(chips.textContent).toContain("Fetch updates (Atlas Sync plugin)");
+    expect(chips.textContent).toContain("Plugin updates fetched");
     expect(chips.textContent).not.toMatch(/Blocked|Denied/);
     expect(lastAssistant().querySelector("details.trace")!.textContent).toContain("doc-nightingale-budget");
     expect(lastAssistant().textContent).toContain("Phase 1: $1.8M");
@@ -98,7 +98,7 @@ describe("same request, two modes (real server handlers)", () => {
     await user.click(screen.getByRole("button", { name: "Find the latest project updates." }));
     await settled();
     const a = lastAssistant();
-    expect(a.querySelector(".chips")!.textContent).toMatch(/Fetch updates \(Atlas Sync plugin\).*Blocked/);
+    expect(a.querySelector(".chips")!.textContent).toMatch(/Untrusted plugin blocked/);
     expect(a.textContent).toContain("Usability test round 2 passed");
     expect(a.textContent).not.toMatch(/Phase 1|\$1\.8M|I also sent/);
     expect(a.getAttribute("data-status")).toBe("done");
@@ -110,7 +110,7 @@ describe("same request, two modes (real server handlers)", () => {
     await user.click(sw());
     await ask(user, "Show me the Nightingale budget");
     await settled();
-    expect(lastAssistant().querySelector(".chips")!.textContent).toContain("Denied");
+    expect(lastAssistant().querySelector(".chips")!.textContent).toMatch(/blocked/);
     expect(lastAssistant().textContent).not.toContain("$4.2M");
     expect(lastAssistant().textContent).not.toMatch(/does not hold the scope/);
     await user.click(within(lastAssistant()).getByText(/Activity \(1\)/));
@@ -164,7 +164,7 @@ describe("same request, two modes (real server handlers)", () => {
     await settled();
     await user.click(within(lastAssistant()).getByRole("button", { name: "Deny" }));
     await waitFor(() => expect(lastAssistant().textContent).toMatch(/You declined. Nothing was sent./));
-    expect(lastAssistant().querySelector(".chips")!.textContent).toContain("Denied");
+    expect(lastAssistant().querySelector(".chips")!.textContent).toContain("Send blocked");
     expect(lastAssistant().textContent).not.toContain("Approval required");
   });
 

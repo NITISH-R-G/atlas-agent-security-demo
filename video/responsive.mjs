@@ -14,6 +14,7 @@ const sizes = [
   [768, 1024],
   [1024, 768],
   [1440, 900],
+  [1920, 1080],
 ];
 const b = await chromium.launch();
 const report = [];
@@ -62,7 +63,7 @@ for (const [w, h] of sizes) {
   }
   // Normal chat: Security ON, request that needs approval
   await p.getByRole("switch", { name: "Security" }).click();
-  await p.getByRole("button", { name: "Send the project summary to the team." }).click();
+  await p.getByRole("button", { name: "Read the project update and send a summary to the team." }).click();
   await p.waitForTimeout(demoRoute ? 3500 : 7000);
   await shot("3-chat-approval");
   const approve = p.getByRole("button", { name: "Approve", exact: true });

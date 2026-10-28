@@ -178,7 +178,7 @@ describe("walkthrough panel", () => {
     await runStage(user, "B");
     expect(outcome()).toBe(b1);
     expect(a1).not.toMatch(/Blocked|Denied/);
-    expect(b1).toMatch(/Blocked/);
+    expect(b1).toMatch(/blocked/);
     expect(screen.getByRole("switch", { name: "Security" }).getAttribute("aria-checked")).toBe("true");
     await user.click(screen.getByRole("button", { name: /Back to chat/ }));
     expect(document.querySelectorAll(".msg").length).toBe(0);

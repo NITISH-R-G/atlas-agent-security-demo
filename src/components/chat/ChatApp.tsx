@@ -3,10 +3,11 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { sendApproval, streamChat } from "@/lib/agent/client";
-import { chatReducer, initialChat, type AssistantMessage, type ChatAction, type ChatState } from "./chat-state";
+import { chatReducer, initialChat, type AssistantMessage, type ChatAction } from "./chat-state";
 import { DEMO_STAGES, type DemoStage } from "./DemoGuide";
 import ExploreSecurity from "./ExploreSecurity";
 import { MessageList } from "./Messages";
+import Sidebar, { isNarrow, type Conversation } from "./Sidebar";
 import Walkthrough from "./Walkthrough";
 
 export const ANCHOR_REQUEST = "Read the project update and send a summary to the team.";
@@ -22,81 +23,6 @@ export const SUGGESTIONS = [
 const uid = () => Math.random().toString(36).slice(2, 10);
 const EXPLORE_ID = "explore";
 
-interface Conversation {
-  id: string;
-  state: ChatState;
-}
-
-const matches = (q: string) => typeof window !== "undefined" && typeof window.matchMedia === "function" && window.matchMedia(q).matches;
-const isNarrow = () => matches("(max-width: 859px)");
-
-const titleOf = (c: Conversation) => {
-  const first = c.state.messages.find((m) => m.role === "user");
-  return first && first.role === "user" ? (first.text.length > 38 ? `${first.text.slice(0, 37)}…` : first.text) : "Untitled chat";
-};
-
-function Sidebar({
-  open,
-  convs,
-  activeId,
-  exploring,
-  onNew,
-  onPick,
-  onExplore,
-  onClose,
-}: {
-  open: boolean;
-  convs: Conversation[];
-  activeId: string;
-  exploring: boolean;
-  onNew: () => void;
-  onPick: (id: string) => void;
-  onExplore: () => void;
-  onClose: () => void;
-}) {
-  const ref = useRef<HTMLElement>(null);
-  // On a phone the sidebar is a drawer: move focus into it when it opens, and let Escape dismiss it.
-  useEffect(() => {
-    if (open && isNarrow()) ref.current?.querySelector<HTMLElement>("button")?.focus();
-  }, [open]);
-  return (
-    <aside ref={ref} className="side" id="atlas-sidebar" aria-label="Sidebar" data-open={open} aria-hidden={open ? undefined : true} inert={!open}>
-      <div className="side-top">
-        <div className="brand">
-          <span className="logo" aria-hidden="true">
-            A
-          </span>
-          <span className="name">Atlas</span>
-        </div>
-        <button type="button" className="icon-btn side-close" aria-label="Close sidebar" onClick={onClose}>
-          <span aria-hidden="true">✕</span>
-        </button>
-      </div>
-      <button type="button" className="newchat" onClick={onNew}>
-        <span aria-hidden="true">＋</span> New chat
-      </button>
-      <nav aria-label="Conversations" className="side-section">
-        <p className="side-label">Recent</p>
-        <ul className="hist">
-          {[...convs].reverse().map((c) => (
-            <li key={c.id}>
-              <button type="button" className="hist-item" aria-current={c.id === activeId && !exploring ? "true" : undefined} onClick={() => onPick(c.id)}>
-                {titleOf(c)}
-              </button>
-            </li>
-          ))}
-        </ul>
-      </nav>
-      <div className="side-section side-tools">
-        <button type="button" className="side-btn" aria-pressed={exploring} onClick={onExplore}>
-          <span aria-hidden="true">◈</span> Explore Security
-        </button>
-      </div>
-      <p className="side-foot">A ChatGPT-inspired agent interface for exploring server-side AI security. Fictional data only. Not affiliated with OpenAI.</p>
-    </aside>
-  );
-}
-
 export default function ChatApp() {
   const [firstId] = useState(uid);
   const [convs, setConvs] = useState<Conversation[]>(() => [
@@ -108,11 +34,14 @@ export default function ChatApp() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [security, setSecurity] = useState(false);
   const [text, setText] = useState("");
+  const [query, setQuery] = useState("");
   const [panel, setPanel] = useState<{ open: boolean; messageId?: string }>({ open: false });
   const [stageRuns, setStageRuns] = useState<Record<string, string>>({});
+  const [deciding, setDeciding] = useState<ReadonlySet<string>>(new Set());
   const abortRef = useRef<AbortController | null>(null);
   const endRef = useRef<HTMLDivElement>(null);
   const taRef = useRef<HTMLTextAreaElement>(null);
+  const searchRef = useRef<HTMLInputElement>(null);
 
   const chatConvs = convs.filter((c) => c.id !== EXPLORE_ID);
   const explore = convs.find((c) => c.id === EXPLORE_ID)!;
@@ -140,8 +69,21 @@ export default function ChatApp() {
       return;
     }
     ta.style.height = "auto";
-    ta.style.height = `${Math.min(ta.scrollHeight, 180)}px`;
+    ta.style.height = `${Math.min(ta.scrollHeight, 200)}px`;
   }, [text]);
+
+  // Ctrl or Cmd + K opens search, like the chat products people already know.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        setSidebarOpen(true);
+        window.setTimeout(() => searchRef.current?.focus(), 30);
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
 
   const closeIfNarrow = () => {
     if (isNarrow()) setSidebarOpen(false);
@@ -200,6 +142,7 @@ export default function ChatApp() {
     setView("chat");
     setPanel((p) => ({ open: p.open }));
     setText("");
+    setQuery("");
     // An empty conversation is reused instead of stacking blank entries in the history.
     if (state.messages.length === 0) dispatchTo(active.id, { type: "clear" });
     else {
@@ -208,7 +151,7 @@ export default function ChatApp() {
       setActiveId(id);
     }
     closeIfNarrow();
-    taRef.current?.focus();
+    window.setTimeout(() => taRef.current?.focus(), 30);
   };
 
   const pick = (id: string) => {
@@ -218,6 +161,22 @@ export default function ChatApp() {
       setPanel((p) => ({ open: p.open }));
     }
     closeIfNarrow();
+  };
+
+  const rename = (id: string, name: string) => setConvs((all) => all.map((c) => (c.id === id ? { ...c, name } : c)));
+
+  const remove = (id: string) => {
+    if (id === activeId) abortRef.current?.abort();
+    const left = convs.filter((c) => c.id !== id && c.id !== EXPLORE_ID);
+    if (left.length === 0) {
+      const fresh = uid();
+      setConvs((all) => [{ id: fresh, state: initialChat }, ...all.filter((c) => c.id === EXPLORE_ID)]);
+      setActiveId(fresh);
+    } else {
+      setConvs((all) => all.filter((c) => c.id !== id));
+      if (id === activeId) setActiveId(left[left.length - 1].id);
+    }
+    setPanel((p) => ({ open: p.open }));
   };
 
   const toggleSecurity = () => {
@@ -237,8 +196,14 @@ export default function ChatApp() {
       resolving.current.delete(callId);
       return;
     }
+    setDeciding((s) => new Set(s).add(callId));
     const r = await sendApproval(callId, approve, owner.approvals.find((a) => a.callId === callId)?.ticket);
     resolving.current.delete(callId);
+    setDeciding((s) => {
+      const n = new Set(s);
+      n.delete(callId);
+      return n;
+    });
     dispatchTo(cid, {
       type: "approval",
       id: owner.id,
@@ -256,6 +221,42 @@ export default function ChatApp() {
   const empty = state.messages.length === 0;
   const exploring = view === "explore";
 
+  const composer = (
+    <form
+      className="composer"
+      onSubmit={(e) => {
+        e.preventDefault();
+        void send(text);
+      }}
+    >
+      <textarea
+        ref={taRef}
+        rows={1}
+        value={text}
+        placeholder="Message Atlas"
+        aria-label="Message"
+        onChange={(e) => setText(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) {
+            e.preventDefault();
+            void send(text);
+          }
+        }}
+      />
+      {working ? (
+        <button type="button" className="send stop" onClick={stop} aria-label="Stop generating">
+          <span aria-hidden="true" className="stop-ico" />
+        </button>
+      ) : (
+        <button type="submit" className="send" disabled={!text.trim()} aria-label="Send message">
+          <svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M10 16V4M5 9l5-5 5 5" />
+          </svg>
+        </button>
+      )}
+    </form>
+  );
+
   return (
     <div
       className={`app${sidebarOpen ? " side-open" : ""}${panel.open ? " wt-open" : ""}`}
@@ -268,8 +269,13 @@ export default function ChatApp() {
         convs={chatConvs}
         activeId={active.id}
         exploring={exploring}
+        query={query}
+        onQuery={setQuery}
+        searchRef={searchRef}
         onNew={newChat}
         onPick={pick}
+        onRename={rename}
+        onDelete={remove}
         onExplore={() => {
           setView(exploring ? "chat" : "explore");
           closeIfNarrow();
@@ -278,11 +284,13 @@ export default function ChatApp() {
       />
       {sidebarOpen ? <div className="scrim" aria-hidden="true" onClick={() => setSidebarOpen(false)} /> : null}
 
-      <div className="shell">
+      <div className="shell" data-empty={!exploring && empty ? "true" : undefined}>
         <header className="bar">
           <div className="who">
             <button type="button" className="icon-btn menu" aria-label={sidebarOpen ? "Hide sidebar" : "Show sidebar"} aria-expanded={sidebarOpen} aria-controls="atlas-sidebar" onClick={() => setSidebarOpen(!sidebarOpen)}>
-              <span aria-hidden="true">☰</span>
+              <svg className="ico" viewBox="0 0 20 20" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true">
+                <path d="M3.5 6h13M3.5 10h9M3.5 14h13" />
+              </svg>
             </button>
             <span className="name">Atlas assistant</span>
             <span className={`dot${working ? " busy" : ""}`} aria-hidden="true" />
@@ -311,78 +319,49 @@ export default function ChatApp() {
               busy={working}
               onRun={runStage}
               onDecide={(callId, approve) => void decide(EXPLORE_ID, callId, approve)}
+              deciding={deciding}
               onEvidence={openEvidence}
               onBack={() => setView("chat")}
               startTour={prepareTour}
             />
           </main>
         ) : (
-          <>
-            <main className="thread" aria-label="Conversation">
-              {empty ? (
-                <div className="empty">
-                  <div className="logo big" aria-hidden="true">
-                    A
-                  </div>
-                  <h1>How can I help?</h1>
-                  <p>The AI suggests. Atlas checks. The action is allowed, held for approval, or blocked. Try the first request below, or open Explore Security.</p>
-                  <ul className="suggest">
-                    {SUGGESTIONS.map((s) => (
-                      <li key={s}>
-                        <button type="button" onClick={() => send(s)}>
-                          {s}
-                        </button>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              ) : (
-                <div className="log">
-                  <MessageList messages={state.messages} onDecide={(callId, approve) => void decide(active.id, callId, approve)} onEvidence={openEvidence} />
-                  <div ref={endRef} />
-                </div>
-              )}
-            </main>
-
-            <form
-              className="composer"
-              onSubmit={(e) => {
-                e.preventDefault();
-                void send(text);
-              }}
-            >
-              <textarea
-                ref={taRef}
-                rows={1}
-                value={text}
-                placeholder="Message Atlas"
-                aria-label="Message"
-                onChange={(e) => setText(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) {
-                    e.preventDefault();
-                    void send(text);
-                  }
-                }}
-              />
-              {working ? (
-                <button type="button" className="send stop" onClick={stop} aria-label="Stop generating">
-                  ■
-                </button>
-              ) : (
-                <button type="submit" className="send" disabled={!text.trim()} aria-label="Send message">
-                  ↑
-                </button>
-              )}
-            </form>
+          <main className={empty ? "hero" : "thread"} aria-label="Conversation">
+            {empty ? (
+              <>
+                <h1>How can I help?</h1>
+                <p className="hero-sub">The AI suggests. Atlas checks. The action is allowed, held for approval, or blocked.</p>
+              </>
+            ) : (
+              <div className="log">
+                <MessageList messages={state.messages} deciding={deciding} onDecide={(callId, approve) => void decide(active.id, callId, approve)} onEvidence={openEvidence} />
+                <div ref={endRef} />
+              </div>
+            )}
+          </main>
+        )}
+        {!exploring ? (
+          <div className="dock">
+            {composer}
+            {empty ? (
+              <ul className="suggest">
+                {SUGGESTIONS.map((s) => (
+                  <li key={s}>
+                    <button type="button" onClick={() => send(s)}>
+                      {s}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            ) : null}
             <p className="fineprint">
               Atlas runs on fictional data and simulated actions.{" "}
               <button type="button" className="linkish" onClick={() => setView("explore")}>
                 Explore Security
               </button>
             </p>
-          </>
-        )}
+          </div>
+        ) : null}
       </div>
 
       {panel.open ? <Walkthrough message={evidenceMessage} onClose={() => setPanel({ open: false })} /> : null}

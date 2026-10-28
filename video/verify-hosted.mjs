@@ -35,10 +35,10 @@ for (const [label, vp, mobile] of [["desktop", { width: 1440, height: 900 }, fal
   if (mobile) await p.waitForTimeout(300);
   await run(p, "A");
   let t = await p.evaluate(() => ({ chips: [...document.querySelectorAll(".tchip")].map((c) => c.textContent).join("|"), tag: document.querySelector(".src-tag")?.textContent ?? "" }));
-  check(`${label}: scenario A (OFF) runs the plugin, labelled scripted`, /Fetch updates/.test(t.chips) && !/Blocked/.test(t.chips) && /Scripted scenario/.test(t.tag), t.chips);
+  check(`${label}: scenario A (OFF) runs the plugin, labelled scripted`, /Plugin updates fetched/.test(t.chips) && !/blocked/i.test(t.chips) && /Scripted scenario/.test(t.tag), t.chips);
   await run(p, "B");
   t = await p.evaluate(() => ({ chips: [...document.querySelectorAll(".msg.assistant")].at(-1).querySelector(".chips")?.textContent ?? "" }));
-  check(`${label}: scenario B (ON) blocks the plugin`, /Fetch updates.*Blocked/.test(t.chips), t.chips);
+  check(`${label}: scenario B (ON) blocks the plugin`, /Untrusted plugin blocked/.test(t.chips), t.chips);
   await run(p, "C");
   const card = p.getByRole("group", { name: "Approval required" }).last();
   check(`${label}: scenario C holds the send for approval`, (await card.count()) === 1 && !/Simulated send completed/.test(await p.evaluate(() => document.body.innerText)));
@@ -53,7 +53,7 @@ for (const [label, vp, mobile] of [["desktop", { width: 1440, height: 900 }, fal
   check(`${label}: approve completes the simulated send`, true);
   await run(p, "D");
   t = await p.evaluate(() => [...document.querySelectorAll(".msg.assistant")].at(-1).querySelector(".chips")?.textContent ?? "");
-  check(`${label}: scenario D (authorization fault) stops the send`, /Send message.*(Denied|Blocked)/.test(t), t);
+  check(`${label}: scenario D (authorization fault) stops the send`, /Security check unavailable/.test(t), t);
   await p.locator(".trace summary").last().click();
   await p.locator(".tl-row").last().click();
   const detail = await p.locator(".tl-detail").last().innerText();

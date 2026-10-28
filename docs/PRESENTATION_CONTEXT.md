@@ -72,7 +72,7 @@ A simulated authorization fault is injected. With Security ON the required check
 
 ## Verified testing evidence
 
-- Automated: 402 tests pass and 11 live-provider tests are skipped (skipped is not passed); TypeScript, ESLint and the production build are clean. Suites cover policy decisions, approvals (session binding, replay on one instance, tampered tickets, cross-instance tickets), hardening (limits, cookies), adversarial scenarios, UI flows (scenarios A to D, approvals, evidence, sidebar, tour) and provider error classification.
+- Automated: 417 tests pass and 11 live-provider tests are skipped (skipped is not passed); TypeScript, ESLint and the production build are clean. Suites cover policy decisions, approvals (session binding, replay on one instance, tampered tickets, cross-instance tickets), hardening (limits, cookies), adversarial scenarios, UI flows (scenarios A to D, approvals, evidence, sidebar, tour) and provider error classification.
 - Hosted (https://atlas-security-demo.vercel.app): live Groq reply with a denied `read_document`; scripted scenarios A to D; approve, deny, replay and cross-session ticket checks; 6 of 6 approvals worked across serverless requests with a ticket and 4 of 4 failed without one; layouts at 360x800, 390x844, 768x1024, 1024x768 and 1440x900 with no horizontal overflow.
 - Local: an invalid provider key produced an honest error and the guided scenarios still ran.
 - Not verified: Groq 429 and timeout behaviour on the hosted site (unit tested only), several physical devices at once, load, real infrastructure outages.

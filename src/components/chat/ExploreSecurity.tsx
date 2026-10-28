@@ -24,6 +24,7 @@ export default function ExploreSecurity({
   busy,
   onRun,
   onDecide,
+  deciding,
   onEvidence,
   onBack,
   startTour,
@@ -34,6 +35,7 @@ export default function ExploreSecurity({
   busy: boolean;
   onRun: (s: DemoStage) => Promise<void>;
   onDecide: (callId: string, approve: boolean) => void;
+  deciding: ReadonlySet<string>;
   onEvidence: (id: string) => void;
   onBack: () => void;
   startTour: () => Promise<void>;
@@ -117,7 +119,7 @@ export default function ExploreSecurity({
             <p className="ex-empty">Run a scenario to replay it here.</p>
           ) : (
             <div className="log">
-              <MessageList messages={messages} onDecide={onDecide} onEvidence={onEvidence} />
+              <MessageList messages={messages} deciding={deciding} onDecide={onDecide} onEvidence={onEvidence} />
             </div>
           )
         ) : (

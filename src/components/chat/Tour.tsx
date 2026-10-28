@@ -53,9 +53,12 @@ export default function Tour({ steps, onClose }: { steps: TourStep[]; onClose: (
     const el = step ? document.querySelector(step.target) : null;
     if (!el) return;
     const r = el.getBoundingClientRect();
-    setBox({ top: r.top - PAD, left: r.left - PAD, width: r.width + PAD * 2, height: r.height + PAD * 2 });
     const vw = window.innerWidth;
     const vh = window.innerHeight;
+    // Keep the highlight inside the viewport so it can never widen the page.
+    const hl = Math.max(4, r.left - PAD);
+    const hr = Math.min(vw - 4, r.right + PAD);
+    setBox({ top: r.top - PAD, left: hl, width: Math.max(0, hr - hl), height: r.height + PAD * 2 });
     const cardH = cardRef.current?.offsetHeight ?? 150;
     const width = Math.min(340, vw - 16);
     const left = Math.max(8, Math.min(r.left, vw - width - 8));

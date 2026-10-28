@@ -40,7 +40,7 @@ Everything runs on fictional data and every send is simulated: no real message l
 
 ## Try Atlas
 
-**[Open Atlas](https://atlas-security-demo.vercel.app)** and click the first suggestion. Then open **Explore Security** in the sidebar for the four scripted scenarios below. Every reply is labelled as a *scripted scenario*, a *live model* (Groq) reply, or a *built-in assistant* reply.
+**[Open Atlas](https://atlas-security-demo.vercel.app)** and click the first suggestion. Then open **Explore Security** in the sidebar for the four scripted scenarios below. The sidebar has New chat, **Search chats** (Ctrl or Cmd + K), session-local history with rename and delete, and Explore Security; chats are kept in this browser tab only. Every reply is labelled as a *scripted scenario*, a *live model* (Groq) reply, or a *built-in assistant* reply.
 
 ## Watch the narrated explanation
 
@@ -102,7 +102,7 @@ npm test && npm run typecheck && npm run lint && npm run build
 npm run test:live   # real provider checks; skipped (not passed) without a key
 ```
 
-Last run: **402 passed, 11 skipped**. The skipped tests are live-provider checks and are not counted as passes. Type-check, lint and production build were clean. The [security coverage matrix](docs/SECURITY-COVERAGE.md) maps each AI security issue to its implementation and tests, including the defect found and fixed in the last review (whitespace padding could hide an injection phrase from the heuristic detector).
+Last run: **417 passed, 11 skipped**. The skipped tests are live-provider checks and are not counted as passes. Type-check, lint and production build were clean. The [security coverage matrix](docs/SECURITY-COVERAGE.md) maps each AI security issue to its implementation and tests, including the defect found and fixed in the last review (whitespace padding could hide an injection phrase from the heuristic detector).
 
 **Not verified:** Groq rate-limit or outage behaviour on the hosted site, use from several devices at once, load.
 
@@ -124,6 +124,6 @@ Environment variable **names** (values are never committed): `LLM_PROVIDER`, `GR
 
 Before a change: run the checks above. Keep tool authorization, approvals, output filtering and the activity record on the server, keep resources synthetic, and do not add real network, filesystem or shell tools. Add a regression test with any fix.
 
-Docs: [index](docs/README.md) · [Presenter guide](docs/PRESENTER.md) · [Coverage matrix](docs/SECURITY-COVERAGE.md) · [Video production](docs/VIDEO_PRODUCTION.md) · [Presentation context](docs/PRESENTATION_CONTEXT.md) · [Deploying](docs/DEPLOY.md)
+Docs: [Interface design audit](docs/DESIGN-AUDIT.md) · [index](docs/README.md) · [Presenter guide](docs/PRESENTER.md) · [Coverage matrix](docs/SECURITY-COVERAGE.md) · [Video production](docs/VIDEO_PRODUCTION.md) · [Presentation context](docs/PRESENTATION_CONTEXT.md) · [Deploying](docs/DEPLOY.md)
 
 Atlas is not affiliated with OpenAI; the interface only follows common chat conventions. No license has been selected for this repository yet.
