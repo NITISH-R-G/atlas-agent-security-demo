@@ -136,7 +136,7 @@ node reference-pack.mjs
 | Format | 1920 x 1080, 30 fps, H.264, AAC stereo |
 | Duration | 3 minutes 2.6 seconds |
 | Size | 11.7 MB |
-| Footage source | a local production build of the same commit (`next start`), because the hosted deployment could not be updated in time: Vercel's free plan rejected further uploads for 24 hours. The interface is identical apart from the scenario C request wording, which the hosted site still shows as "Send the project summary to the team." until it is redeployed |
+| Footage source | a local production build of the same code (`next start`). The hosted site was redeployed on 2026-10-28 and now serves the same scenario C wording; its interface differs from the footage only in the reworded labels (for example "Scripted scenario" instead of "Scripted demo scenario") |
 
 ## Verified, illustrative, untested
 

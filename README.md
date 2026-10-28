@@ -48,7 +48,7 @@ Everything runs on fictional data and every send is simulated: no real message l
 
 <a href="assets/demo.mp4"><img src="assets/video-thumbnail.png" alt="Atlas explainer video: the AI suggests, Atlas checks" width="860"></a>
 
-<sub>3 minutes, captions burned in ([demo.srt](assets/demo.srt)). The video was recorded from a local build of this repository.</sub>
+<sub>3 minutes, captions burned in ([demo.srt](assets/demo.srt)). Recorded from a local build of this repository; the hosted site serves the same interface.</sub>
 
 </div>
 

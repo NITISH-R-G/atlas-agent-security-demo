@@ -42,7 +42,6 @@ Optional: **Take the tour** in Explore Security (five short steps).
 | The live model errors or is rate limited | Atlas shows an honest error. Do not retry repeatedly. Carry on with Explore Security: scenarios A to D never use a model. |
 | "Unknown or expired" on Approve | The approval expired (10 minutes) or the server restarted. Run the request again. |
 | The site is slow to start | Open `/api/health` first and wait for it; the first request after idle takes a few seconds. |
-| The hosted site does not match the video wording | The video was recorded from a local build while a redeploy was blocked. Say so, and use the local build or the video. |
 | A live reply does not suggest a tool | Models vary. Use the scripted scenarios, which are repeatable. |
 
 ## Where the detail lives
