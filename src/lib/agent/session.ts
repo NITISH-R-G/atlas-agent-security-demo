@@ -51,9 +51,14 @@ const gg = globalThis as unknown as { __atlasGlobal?: { start: number; count: nu
 const globalWindow = (gg.__atlasGlobal ??= { start: 0, count: 0 });
 const inflight = (gg.__atlasInflight ??= { n: 0 });
 
-/** The client address as set by the hosting proxy (Fly, Render and Railway set one of these). Undefined when running without a proxy. */
-export function clientIp(req: Request): string | undefined {
-  const raw = req.headers.get("fly-client-ip") ?? req.headers.get("x-real-ip") ?? req.headers.get("x-forwarded-for")?.split(",")[0];
+/**
+ * The client address as set by the hosting proxy. A header is trusted only where the platform owns it: `fly-client-ip`
+ * on Fly (the route passes onFly from FLY_APP_NAME; this module reads no environment), otherwise `x-real-ip`, then the entry the single trusted proxy appended to
+ * `x-forwarded-for` (the rightmost one; anything to its left was written by the caller). Undefined when running without a proxy.
+ */
+export function clientIp(req: Request, onFly = false): string | undefined {
+  const forwarded = req.headers.get("x-forwarded-for")?.split(",").at(-1);
+  const raw = onFly ? req.headers.get("fly-client-ip") : (req.headers.get("x-real-ip") ?? forwarded);
   const ip = raw?.trim();
   return ip && ip.length <= 64 && /^[0-9a-fA-F:.]+$/.test(ip) ? ip : undefined;
 }

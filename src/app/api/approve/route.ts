@@ -1,6 +1,8 @@
 import { hasPending, restorePending } from "@/lib/agent/approvals";
+import { isCrossSite, readBoundedText } from "@/lib/agent/http-guard";
 import { unsealCall } from "@/lib/agent/seal";
 import { resolveApproval } from "@/lib/agent/approve";
+import { restoreParkedCall } from "@/lib/agent/ticket";
 import { toView } from "@/lib/agent/planner";
 import { readSid } from "@/lib/agent/session";
 
@@ -8,9 +10,12 @@ export const runtime = "nodejs";
 
 /** Resolves a parked sensitive action. Only an explicit user click in the UI calls this. */
 export async function POST(req: Request) {
+  if (isCrossSite(req)) return Response.json({ error: { message: "Cross-site requests are not accepted." } }, { status: 403 });
   let body: unknown;
   try {
-    body = await req.json();
+    const raw = await readBoundedText(req, 16 * 1024); // a sealed ticket is at most 8 KiB
+    if (raw === undefined) return Response.json({ error: { message: "Request is too large." } }, { status: 413 });
+    body = JSON.parse(raw);
   } catch {
     return Response.json({ error: { message: "Request body must be valid JSON." } }, { status: 400 });
   }
@@ -21,7 +26,9 @@ export async function POST(req: Request) {
   // The instance that parked this call may not be the one serving this request (serverless). Recover it from a verified ticket.
   if (typeof ticket === "string" && !hasPending(callId)) {
     const sealed = unsealCall(ticket, process.env.ATLAS_SEAL_SECRET);
-    if (sealed && sealed.call.callId === callId) restorePending(sealed.call, sealed.at);
+    // The ticket's content is never an authority: policy, state and the allowed tools are derived server-side (ticket.ts).
+    const call = sealed && sealed.call.callId === callId ? restoreParkedCall(sealed.call) : undefined;
+    if (call && sealed) restorePending(call, sealed.at);
   }
   const result = await resolveApproval(callId, approve, { sid: readSid(req) });
   if (!result.ok) return Response.json({ error: { message: result.error } }, { status: 404 });

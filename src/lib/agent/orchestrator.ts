@@ -2,6 +2,7 @@ import { createOpenAI } from "@ai-sdk/openai";
 import { jsonSchema, stepCountIs, streamText, tool, type ModelMessage } from "ai";
 
 import { buildAnswer, type Block } from "./answer";
+import { describePending, peekPending } from "./approvals";
 import { scanUntrusted } from "./content";
 import { MODEL_TOOLS, SYSTEM_PROMPT } from "./model-tools";
 import { classifyProviderError, describeModel, type ModelConfig } from "./provider";
@@ -181,7 +182,10 @@ export async function runModel(run: ModelRun): Promise<ModelResult> {
           emit({ type: "tool", view: toView(outcome) });
           if (policy.audit) emit({ type: "audit", record: { callId, tool: outcome.tool, target: outcome.target, decision: outcome.decision, layer: outcome.layer, source: ctx.source } });
           emit({ type: "step", id: callId, kind: "tool", text: `${outcome.label}${outcome.target !== "-" ? `: ${outcome.target}` : ""}`, state: outcome.status === "ok" ? "done" : "failed" });
-          if (outcome.status === "pending") emit({ type: "approval", callId, label: outcome.label, summary: `${outcome.label} ${outcome.target}` });
+          if (outcome.status === "pending") {
+            const parked = peekPending(callId);
+            emit({ type: "approval", callId, label: outcome.label, summary: parked ? describePending(parked.call.tool, parked.call.args) : `${outcome.label} ${outcome.target}` });
+          }
           return forModel(outcome, policy, emit);
         },
       }),

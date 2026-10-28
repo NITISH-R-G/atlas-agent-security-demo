@@ -13,7 +13,7 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:live": "node --env-file-if-exists=.env.local ./node_modules/vitest/vitest.mjs run src/lib/agent/live.test.ts src/lib/agent/adversarial.live.test.ts src/lib/agent/live-eval.test.ts"
+    "test:live": "node --env-file-if-exists=.env.local ./node_modules/vitest/vitest.mjs run src/lib/agent/live.test.ts src/lib/agent/adversarial.live.test.ts src/lib/agent/live-eval.test.ts src/lib/agent/audit.live.test.ts"
   },
   "dependencies": {
     "@ai-sdk/openai": "^4.0.72",

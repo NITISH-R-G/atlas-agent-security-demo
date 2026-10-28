@@ -1,4 +1,5 @@
 import { buildAnswer, type Answer, type Block } from "./answer";
+import { describePending } from "./approvals";
 import { scanUntrusted, extractDirectives, stripDirectives } from "./content";
 import type { ControlEval } from "./controls";
 import type { AuditRecord } from "./audit";
@@ -221,8 +222,7 @@ export async function runAgent(opts: RunOptions): Promise<RunResult> {
     return outcome;
   }
 
-  const describe = (tool: string, args: Record<string, unknown>) =>
-    tool === "send_message" ? `Send "${String(args.subject)}" to ${String(args.to)}` : `${tool} ${JSON.stringify(args)}`;
+  const describe = describePending;
 
   const fieldsOf = (o: ToolOutcome) => (o.data as { fields?: Record<string, string> } | undefined)?.fields ?? {};
   const titleOf = (o: ToolOutcome) => (o.data as { title?: string } | undefined)?.title ?? "record";

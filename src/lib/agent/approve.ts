@@ -23,7 +23,7 @@ export async function resolveApproval(
   if (!approve) {
     // A human refusal is a security decision too: record it when auditing is on, and never execute the call.
     if (!pending.policy.audit) return { ok: true, decision: "denied" };
-    const view: AuditView = { callId, tool: pending.tool, target: String(pending.args.to ?? pending.args.id ?? "-"), decision: "denied", layer: "approvalForSensitive", source: pending.source };
+    const view: AuditView = { callId, tool: pending.tool, target: String(pending.args.to ?? pending.args.id ?? (Array.isArray(pending.args.ids) ? pending.args.ids.join(",") : "-")).slice(0, 60), decision: "denied", layer: "approvalForSensitive", source: pending.source };
     recordAudit({ at: Date.now(), ...view, source: pending.source });
     return { ok: true, decision: "denied", audit: view };
   }

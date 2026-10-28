@@ -1,5 +1,5 @@
 // @vitest-environment node
-import { beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { POST as chatRoute } from "@/app/api/chat/route";
 import { GET as health } from "@/app/api/health/route";
@@ -12,6 +12,8 @@ beforeEach(() => {
   resetRateLimits();
   process.env.ATLAS_SIMULATED_LATENCY = "0";
 });
+
+afterEach(() => vi.unstubAllEnvs());
 
 describe("health endpoint", () => {
   it("reports the configured provider and model but no secrets", async () => {
@@ -52,8 +54,9 @@ describe("proxy-aware helpers", () => {
   });
 
   it("accepts only plausible client addresses", () => {
-    expect(clientIp(new Request("http://x", { headers: { "fly-client-ip": "203.0.113.9" } }))).toBe("203.0.113.9");
-    expect(clientIp(new Request("http://x", { headers: { "x-forwarded-for": "evil; drop, 1.2.3.4" } }))).toBeUndefined();
+    // fly-client-ip is trusted only where Fly sets it
+    expect(clientIp(new Request("http://x", { headers: { "fly-client-ip": "203.0.113.9" } }), true)).toBe("203.0.113.9");
+    expect(clientIp(new Request("http://x", { headers: { "x-forwarded-for": "1.2.3.4, evil; drop" } }))).toBeUndefined();
     expect(clientIp(new Request("http://x"))).toBeUndefined();
   });
 });
@@ -65,6 +68,7 @@ describe("request limits", () => {
   });
 
   it("limits a client by IP even when it discards its cookie", async () => {
+    vi.stubEnv("FLY_APP_NAME", "atlas");
     let last = 0;
     for (let i = 0; i < 160; i++) {
       const res = await chat({ headers: { "fly-client-ip": "198.51.100.7" }, body: JSON.stringify({ message: "hi", security: true }) });

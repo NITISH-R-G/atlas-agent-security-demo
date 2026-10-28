@@ -443,10 +443,10 @@ export async function executeTool(ctx: Context, call: ToolCall): Promise<ToolOut
     return finish({ label: def.label, target: "-", decision: "invalid", layer: "validation", reason: "Invalid arguments.", status: "blocked", notices: ["Permission denied"] });
   }
   const args = parsed.data;
-  // Type confusion guard (platform validation, always on): a tool returns only resources of its own kind.
+  // Type confusion and existence guard (platform validation, always on): a tool returns only existing resources of its own kind.
   if (def.kind) {
     const ids = Array.isArray(args.ids) ? (args.ids as string[]) : args.id !== undefined ? [String(args.id)] : [];
-    if (ids.some((x) => RESOURCE_BY_ID.get(x) && RESOURCE_BY_ID.get(x)!.kind !== def.kind)) {
+    if (ids.some((x) => RESOURCE_BY_ID.get(x)?.kind !== def.kind)) {
       return finish({ label: def.label, target: "-", decision: "invalid", layer: "validation", reason: "Unknown resource.", status: "blocked", notices: ["Permission denied"] });
     }
   }

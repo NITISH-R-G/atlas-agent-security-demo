@@ -17,6 +17,22 @@ export interface PendingCall {
   source?: "scripted" | "builtin" | "model";
 }
 
+const BODY_PREVIEW = 300;
+const oneLine = (s: unknown) => String(s).replace(/\s+/g, " ").trim();
+
+/**
+ * What the approval prompt shows. Built from the arguments the server parked (the ones that will run), never from the
+ * model's description of the call, so the user approves exactly what executes. Long bodies are shortened, and it says so.
+ */
+export function describePending(tool: string, args: Record<string, unknown>): string {
+  if (tool === "send_message") {
+    const body = oneLine(args.body);
+    const shown = body.length > BODY_PREVIEW ? `${body.slice(0, BODY_PREVIEW)}… (${body.length - BODY_PREVIEW} more characters, truncated)` : body;
+    return `Send "${oneLine(args.subject)}" to ${oneLine(args.to)}. Message: ${shown}`;
+  }
+  return `${tool} ${oneLine(JSON.stringify(args))}`;
+}
+
 export const TTL_MS = 10 * 60 * 1000;
 export const MAX_PENDING = 200;
 const g = globalThis as unknown as { __atlasPending?: Map<string, { call: PendingCall; at: number }> };
@@ -53,7 +69,8 @@ export function peekPending(callId: string): { call: PendingCall; at: number } |
 
 /** Re-parks a call recovered from a verified ticket. Refuses expired or already-consumed ids. Keeps the original timestamp. */
 export function restorePending(call: PendingCall, at: number, now = Date.now()): boolean {
-  if (now - at > TTL_MS || consumed.has(call.callId)) return false;
+  // Expired, dated in the future (it would never expire), or already consumed here.
+  if (now - at > TTL_MS || at - now > 60_000 || consumed.has(call.callId)) return false;
   store.set(call.callId, { call, at });
   while (store.size > MAX_PENDING) store.delete(store.keys().next().value as string);
   return true;

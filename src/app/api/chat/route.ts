@@ -1,3 +1,4 @@
+import { isCrossSite, readBoundedText } from "@/lib/agent/http-guard";
 import { matchPrepared } from "@/lib/agent/prepared";
 import { peekPending } from "@/lib/agent/approvals";
 import { sealCall } from "@/lib/agent/seal";
@@ -24,13 +25,12 @@ const json = (status: number, code: string, message: string) => Response.json({ 
  *   through the same server-side boundary. Otherwise, or in demo mode, a deterministic planner runs, and says so.
  */
 export async function POST(req: Request) {
-  // Bound the request size before parsing (the app only needs a few KB).
-  const declared = Number(req.headers.get("content-length") ?? 0);
-  if (declared > MAX_BODY) return json(413, "too_large", "Request is too large.");
+  if (isCrossSite(req)) return json(403, "cross_site", "Cross-site requests are not accepted.");
+  // Bound the request size while reading, even when no length is declared (the app only needs a few KB).
   let body: unknown;
   try {
-    const raw = await req.text();
-    if (raw.length > MAX_BODY) return json(413, "too_large", "Request is too large.");
+    const raw = await readBoundedText(req, MAX_BODY);
+    if (raw === undefined) return json(413, "too_large", "Request is too large.");
     body = JSON.parse(raw);
   } catch {
     return json(400, "bad_json", "Request body must be valid JSON.");
@@ -44,7 +44,7 @@ export async function POST(req: Request) {
   const sid = existing ?? newSid();
   const cookie = existing ? undefined : sidCookie(sid, isHttps(req));
   const limited = (message: string, status = 429, code = "rate_limited") => Response.json({ error: { code, message } }, { status, headers: cookie ? { "Set-Cookie": cookie } : undefined });
-  const ip = clientIp(req);
+  const ip = clientIp(req, !!process.env.FLY_APP_NAME);
   if (ip && !allowChat(`ip:${ip}`, Date.now(), IP_LIMIT)) return limited("Too many requests from this network. Wait a few minutes and try again.");
   if (!allowChat(sid)) return limited("Too many requests from this session. Wait a few minutes and try again.");
   if (!allowGlobal()) return limited("Atlas is receiving a lot of traffic. Wait a few minutes and try again.", 503, "busy");
