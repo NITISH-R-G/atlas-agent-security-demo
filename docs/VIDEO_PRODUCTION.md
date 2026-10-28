@@ -136,6 +136,7 @@ node reference-pack.mjs
 | Format | 1920 x 1080, 30 fps, H.264, AAC stereo |
 | Duration | 3 minutes 2.6 seconds |
 | Size | 11.7 MB |
+| Interface version | The footage predates the Atlas 2.0 redesign (see [DESIGN-AUDIT.md](DESIGN-AUDIT.md)): layout, chip wording and the empty screen differ from the live site. Behaviour, scenarios and narration are unchanged. Re-recording is possible with `video/record.mjs` but would need selector updates and new narration quota for any changed wording |
 | Footage source | a local production build of the same code (`next start`). The hosted site was redeployed on 2026-10-28 and now serves the same scenario C wording; its interface differs from the footage only in the reworded labels (for example "Scripted scenario" instead of "Scripted demo scenario") |
 
 ## Verified, illustrative, untested
