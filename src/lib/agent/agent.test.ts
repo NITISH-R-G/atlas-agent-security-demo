@@ -94,7 +94,7 @@ describe("each control changes the real execution path", () => {
 
   it("approvalForSensitive: the action does not run before approval", async () => {
     const ctx = ctxFor(onlyControls("approvalForSensitive"));
-    const args = { to: "team@demo-company.example", subject: "s", body: "b" };
+    const args = { to: "team@atlas-labs.example", subject: "s", body: "b" };
     const o = await call(ctx, "send_message", args);
     expect(o).toMatchObject({ decision: "approval_required", status: "pending", notices: ["Approval required"] });
     expect(ctx.state.outbox).toHaveLength(0);
@@ -116,10 +116,10 @@ describe("each control changes the real execution path", () => {
       throw new Error("policy engine down");
     };
     const closed = ctxFor(onlyControls("failClosed"), { extraChecks: [boom] });
-    expect(await call(closed, "send_message", { to: "a@demo-company.example", subject: "s", body: "b" })).toMatchObject({ decision: "denied", layer: "failClosed", status: "blocked" });
+    expect(await call(closed, "send_message", { to: "a@atlas-labs.example", subject: "s", body: "b" })).toMatchObject({ decision: "denied", layer: "failClosed", status: "blocked" });
     expect(closed.state.outbox).toHaveLength(0);
     const open = ctxFor(policyFor(false), { extraChecks: [boom] });
-    expect((await call(open, "send_message", { to: "a@demo-company.example", subject: "s", body: "b" })).status).toBe("ok");
+    expect((await call(open, "send_message", { to: "a@atlas-labs.example", subject: "s", body: "b" })).status).toBe("ok");
   });
 
   it("protected identity holds exactly the narrow task scopes; vulnerable holds *", () => {
@@ -149,7 +149,7 @@ describe("runtime safety", () => {
   it("'sending' only appends to the in-memory outbox", async () => {
     const ctx = ctxFor(policyFor(false));
     const o = await call(ctx, "send_message", { to: "x@partner-vendor.example", subject: "s", body: "b" });
-    expect(o.data).toMatchObject({ delivered: "simulated-outbox" });
+    expect(o.data).toMatchObject({ delivered: "outbox" });
     expect(ctx.state.outbox).toHaveLength(1);
   });
 

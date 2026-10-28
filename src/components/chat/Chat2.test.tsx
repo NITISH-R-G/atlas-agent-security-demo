@@ -7,7 +7,9 @@ import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vite
 import { POST as approveRoute } from "@/app/api/approve/route";
 import { POST as chatRoute } from "@/app/api/chat/route";
 import { clearPending } from "@/lib/agent/approvals";
-import ChatApp, { ANCHOR_REQUEST } from "./ChatApp";
+import ChatApp from "./ChatApp";
+
+const ANCHOR_REQUEST = "Read the project update and send a summary to the team.";
 
 const jar: { cookie?: string } = {};
 let approveDelay = 0;
@@ -29,6 +31,7 @@ beforeAll(() => {
   process.env.ATLAS_SIMULATED_LATENCY = "0";
 });
 beforeEach(() => {
+  window.localStorage.clear();
   clearPending();
   approveDelay = 0;
   installFetch();
@@ -58,12 +61,17 @@ describe("composer and empty state", () => {
     expect(screen.getByRole("textbox", { name: "Message" })).toBe(box);
   });
 
-  it("the first suggestion is the anchor request and runs it", async () => {
+  it("the empty state offers only the composer: no preset buttons, scenario pickers or launchers", () => {
+    render(<ChatApp />);
+    const names = screen.getAllByRole("button").map((b) => (b.getAttribute("aria-label") ?? b.textContent ?? "").toLowerCase());
+    expect(names.some((n) => /run|launch|start|replay|scenario|explore|tour/.test(n))).toBe(false);
+    expect(document.querySelector("ul.suggest")).toBeNull();
+  });
+
+  it("a typed request runs through the normal composer", async () => {
     const user = userEvent.setup();
     render(<ChatApp />);
-    const first = screen.getAllByRole("button").find((b) => b.textContent === ANCHOR_REQUEST)!;
-    await user.click(first);
-    await idle();
+    await ask(user, ANCHOR_REQUEST);
     expect(document.querySelector(".msg.user .bubble")!.textContent).toBe(ANCHOR_REQUEST);
   });
 });
@@ -163,7 +171,6 @@ describe("messages: copy, activity wording and approval states come from real re
   it("the example request shows 'Project record read' then 'Approval required'; deny and approve each report the real outcome", async () => {
     const user = userEvent.setup();
     render(<ChatApp />);
-    await user.click(screen.getByRole("switch", { name: "Security" }));
     await ask(user, ANCHOR_REQUEST);
     const chips = document.querySelector(".chips")!;
     expect(chips.textContent).toContain("Project record read");
@@ -172,32 +179,29 @@ describe("messages: copy, activity wording and approval states come from real re
     expect(within(card).getByText(/Not done yet/)).toBeTruthy();
     await user.click(within(card).getByRole("button", { name: "Deny" }));
     await waitFor(() => expect(document.body.textContent).toMatch(/You declined. Nothing was sent./));
-    expect(document.body.textContent).not.toMatch(/Simulated send completed/);
+    expect(document.body.textContent).not.toMatch(/Message queued in outbox/);
   });
 
   it("while a decision is in flight the buttons are disabled and the card says so; the success line appears only after the server answers", async () => {
     const user = userEvent.setup();
     approveDelay = 300;
     render(<ChatApp />);
-    await user.click(screen.getByRole("switch", { name: "Security" }));
     await ask(user, ANCHOR_REQUEST);
     const card = screen.getByRole("group", { name: "Approval required" });
     await user.click(within(card).getByRole("button", { name: "Approve" }));
     await waitFor(() => expect((within(card).getByRole("button", { name: "Approve" }) as HTMLButtonElement).disabled).toBe(true));
     expect(within(card).getByText(/Checking your decision/)).toBeTruthy();
-    expect(document.body.textContent).not.toMatch(/Simulated send completed/);
-    await waitFor(() => expect(document.body.textContent).toMatch(/Approved · Simulated send completed/));
+    expect(document.body.textContent).not.toMatch(/Message queued in outbox/);
+    await waitFor(() => expect(document.body.textContent).toMatch(/Approved · Message queued in outbox/));
   });
 
-  it("scenario D names the failed check; scenario B names the blocked plugin; both from real decisions", async () => {
+  it("a plugin request names the rejected source and the trusted one, from the real decision", async () => {
     const user = userEvent.setup();
     render(<ChatApp />);
-    await user.click(within(side()).getByRole("button", { name: "Explore Security" }));
-    await user.click(screen.getByRole("button", { name: /Run scenario B/ }));
-    await waitFor(() => expect(document.body.textContent).toMatch(/Untrusted plugin blocked/));
-    await idle();
-    await user.click(screen.getByRole("button", { name: /Run scenario D/ }));
-    await waitFor(() => expect(document.body.textContent).toMatch(/Security check unavailable/));
+    await ask(user, "Find the latest project updates.");
+    expect(document.body.textContent).toMatch(/Untrusted plugin blocked/);
+    expect(document.body.textContent).toMatch(/Untrusted source rejected/);
+    expect(document.body.textContent).toMatch(/Trusted source used/);
   });
 });
 

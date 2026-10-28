@@ -55,7 +55,7 @@ Each beat is a separate clip, so pauses come from the timeline. Beats `b..` were
 
 - **b17** (1:36, pause 2 s): Some actions are allowed, but only with a human decision. Sending a message to the team is one of them.
 - **n06** (1:45, pause 6.5 s): Right now, the action is waiting, not done. Let's say no first, then yes.
-- **b20** (1:57, pause 4 s): And remember, a send here only writes to a simulated outbox. No message ever leaves the application.
+- **b20** (1:57, pause 4 s): And remember, a send here only writes to an outbox. No message ever leaves the application.
 
 ### What if a check fails?
 

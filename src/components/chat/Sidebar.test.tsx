@@ -32,17 +32,18 @@ beforeAll(() => {
   process.env.ATLAS_SIMULATED_LATENCY = "0";
 });
 beforeEach(() => {
+  window.localStorage.clear();
   clearPending();
   installFetch();
 });
 afterEach(() => vi.unstubAllGlobals());
 
 describe("sidebar and conversation history", () => {
-  it("starts with a sidebar containing New chat, history and the explore actions", () => {
+  it("starts with a sidebar containing New chat, search and history, and nothing else", () => {
     render(<ChatApp />);
     const side = screen.getByRole("complementary", { name: "Sidebar" });
     expect(within(side).getByRole("button", { name: "New chat" })).toBeTruthy();
-    expect(within(side).getByRole("button", { name: "Explore Security" })).toBeTruthy();
+    expect(within(side).queryByRole("button", { name: /explore/i })).toBeNull();
     expect(within(side).getByRole("button", { name: "Untitled chat" })).toBeTruthy();
   });
 
@@ -61,7 +62,8 @@ describe("sidebar and conversation history", () => {
   it("New chat keeps the previous conversation in history and switching restores it", async () => {
     const user = userEvent.setup();
     render(<ChatApp />);
-    await user.click(screen.getByRole("button", { name: "Find the latest project updates." }));
+    await user.type(screen.getByRole("textbox", { name: "Message" }), "Find the latest project updates.");
+    await user.keyboard("{Enter}");
     await waitFor(() => expect(within(screen.getByRole("complementary", { name: "Sidebar" })).getByRole("button", { name: "Find the latest project updates." }).getAttribute("aria-current")).toBe("true"));
     await user.click(screen.getByRole("button", { name: "New chat" }));
     const side = screen.getByRole("complementary", { name: "Sidebar" });
@@ -112,22 +114,21 @@ describe("phone layout behavior", () => {
     const user = userEvent.setup();
     render(<ChatApp />);
     await user.click(await screen.findByRole("button", { name: "Show sidebar" }));
-    await user.click(within(screen.getByRole("complementary", { name: "Sidebar" })).getByRole("button", { name: "Explore Security" }));
+    await user.click(within(screen.getByRole("complementary", { name: "Sidebar" })).getByRole("button", { name: "New chat" }));
     expect(screen.getByRole("button", { name: "Show sidebar" })).toBeTruthy();
-    expect(screen.getByRole("region", { name: "Explore Security" })).toBeTruthy();
     const sw = screen.getByRole("switch", { name: "Security" });
-    expect(sw.getAttribute("aria-checked")).toBe("false");
-    await user.click(sw);
     expect(sw.getAttribute("aria-checked")).toBe("true");
+    await user.click(sw);
+    expect(sw.getAttribute("aria-checked")).toBe("false");
   });
 
   it("does not auto-open the evidence sheet over the conversation on a narrow viewport", async () => {
     narrow(true);
     const user = userEvent.setup();
     render(<ChatApp />);
-    await user.click(await screen.findByRole("button", { name: "Show sidebar" }));
-    await user.click(within(screen.getByRole("complementary", { name: "Sidebar" })).getByRole("button", { name: "Explore Security" }));
-    await user.click(screen.getByRole("button", { name: /Run scenario B/ }));
+    await screen.findByRole("button", { name: "Show sidebar" });
+    await user.type(screen.getByRole("textbox", { name: "Message" }), "Find the latest project updates.");
+    await user.keyboard("{Enter}");
     await waitFor(() => expect(document.querySelector(".msg.assistant")?.getAttribute("data-status")).toBe("done"), { timeout: 4000 });
     await waitFor(() => expect(screen.getByRole("button", { name: "Show sidebar" })).toBeTruthy());
     expect(screen.queryByRole("complementary", { name: "Security walkthrough" })).toBeNull();

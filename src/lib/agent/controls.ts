@@ -1,7 +1,7 @@
 import type { ControlKey } from "./policy";
 
 /** Display metadata for the 11 controls. Pure data; decisions come only from the execution layer. */
-export const CONTROL_INFO: Record<ControlKey, { name: string; purpose: string; stage: string; enforcement: "server-enforced" | "simulated-inputs" }> = {
+export const CONTROL_INFO: Record<ControlKey, { name: string; purpose: string; stage: string; enforcement: "server-enforced" | "modelled-inputs" }> = {
   leastPrivilege: { name: "Least privilege", purpose: "The agent identity holds only the permissions its task needs.", stage: "Identity check", enforcement: "server-enforced" },
   scopedCredentials: { name: "Scoped, short-lived credentials", purpose: "The synthetic credential has explicit scopes and an expiry.", stage: "Credential check", enforcement: "server-enforced" },
   resourceAuthz: { name: "Resource-level authorization", purpose: "Each protected resource is checked against who may read it.", stage: "Resource check", enforcement: "server-enforced" },

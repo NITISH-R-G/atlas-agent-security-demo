@@ -38,7 +38,7 @@ export default function Walkthrough({ message, onClose }: { message: AssistantMe
       ) : (
         <>
           <p className="wt-sub">
-            Follows the real execution of the selected reply. Security was <strong>{message.security ? "ON" : "OFF"}</strong> for it. A client-side switch is a scenario setting, not a trust boundary.
+            Follows the real execution of the selected reply. Security was <strong>{message.security ? "ON" : "OFF"}</strong> for it. The browser only sends the setting; the server turns it into a fixed policy.
           </p>
           <ol className="wt-steps">
             {steps.map((s) => (
@@ -57,6 +57,14 @@ export default function Walkthrough({ message, onClose }: { message: AssistantMe
             <section className="wt-detail" aria-label="Step details">
               <h3>{selected.title}</h3>
               <p className="wt-text">{selected.detail}</p>
+              {selected.principal ? (
+                <dl className="tl-detail">
+                  <dt>Acting as</dt>
+                  <dd>{selected.principal}</dd>
+                  <dt>Tool source</dt>
+                  <dd>{selected.source}</dd>
+                </dl>
+              ) : null}
               {selected.evals.length ? (
                 <ul className="wt-evals">
                   {selected.evals.map((e, i) => {

@@ -6,7 +6,7 @@ import { POST as chatRoute } from "@/app/api/chat/route";
 import { POST as approveRoute } from "@/app/api/approve/route";
 import { clearPending } from "@/lib/agent/approvals";
 import { chatReducer, initialChat } from "./chat-state";
-import ChatApp, { SUGGESTIONS } from "./ChatApp";
+import ChatApp from "./ChatApp";
 
 /** Routes the browser's fetch calls to the real server handlers, in-process. */
 const jar: { cookie?: string } = {};
@@ -31,6 +31,7 @@ beforeAll(() => {
   delete process.env.THESYS_API_KEY;
 });
 beforeEach(() => {
+  window.localStorage.clear();
   clearPending();
   installFetch();
 });
@@ -45,24 +46,32 @@ const lastAssistant = () => [...document.querySelectorAll<HTMLElement>(".msg.ass
 const settled = () => waitFor(() => expect(lastAssistant().getAttribute("data-status")).not.toBe("working"), { timeout: 4000 });
 
 describe("shell", () => {
-  it("looks like an assistant: name, status, one prominent security switch, suggestions, no security dashboard", () => {
+  it("looks like an assistant: name, status, one security switch that starts on, no launcher, no presentation wording", () => {
     render(<ChatApp />);
     expect(screen.getByText("Atlas")).toBeTruthy();
     expect(screen.getByText("Ready")).toBeTruthy();
     expect(screen.getAllByRole("switch")).toHaveLength(1);
-    expect(screen.getByText("Unprotected")).toBeTruthy();
-    expect(sw().getAttribute("aria-checked")).toBe("false");
-    for (const s of SUGGESTIONS) expect(screen.getByRole("button", { name: s })).toBeTruthy();
+    expect(screen.getByText("Security on")).toBeTruthy();
+    expect(sw().getAttribute("aria-checked")).toBe("true");
+    expect(document.querySelectorAll("ul.suggest").length).toBe(0);
     const text = document.body.textContent!;
     expect(text).not.toMatch(/ASI0[34]|risk score|attack graph|glossary/i);
+    expect(text).not.toMatch(/demo|simulat|scripted|scenario|explore security/i);
+    expect(sw().getAttribute("aria-describedby")).toBe("security-help");
+    expect(document.getElementById("security-help")!.textContent).toMatch(/server checks who is signed in/);
   });
 
-  it("toggle updates the mode label and aria state", async () => {
+  it("toggle updates the mode label and aria state, and the choice is remembered", async () => {
     const user = userEvent.setup();
-    render(<ChatApp />);
+    const { unmount } = render(<ChatApp />);
     await user.click(sw());
-    expect(sw().getAttribute("aria-checked")).toBe("true");
-    expect(screen.getByText("Protected")).toBeTruthy();
+    expect(sw().getAttribute("aria-checked")).toBe("false");
+    expect(screen.getByText("Security off")).toBeTruthy();
+    unmount();
+    render(<ChatApp />);
+    await waitFor(() => expect(sw().getAttribute("aria-checked")).toBe("false"));
+    await user.click(sw());
+    expect(window.localStorage.getItem("atlas.security")).toBe("on");
   });
 
   it("Enter sends, Shift+Enter makes a newline, empty messages are not sent", async () => {
@@ -81,21 +90,21 @@ describe("same request, two modes (real server handlers)", () => {
   it("Security OFF: the agent follows the untrusted instructions and chips show the access it was granted", async () => {
     const user = userEvent.setup();
     render(<ChatApp />);
-    await user.click(screen.getByRole("button", { name: "Find the latest project updates." }));
+    await user.click(sw());
+    await ask(user, "Find the latest project updates.");
     await settled();
     const chips = within(lastAssistant()).getByRole("list", { name: "Tool activity" });
     expect(chips.textContent).toContain("Plugin updates fetched");
     expect(chips.textContent).not.toMatch(/Blocked|Denied/);
     expect(lastAssistant().querySelector("details.trace")!.textContent).toContain("doc-nightingale-budget");
     expect(lastAssistant().textContent).toContain("Phase 1: $1.8M");
-    expect(lastAssistant().textContent).toContain("I also sent this to review@partner-vendor.example");
+    expect(lastAssistant().textContent).toContain("told me to send this to review@partner-vendor.example");
   });
 
   it("Security ON: untrusted tool blocked, task still completed, nothing leaked", async () => {
     const user = userEvent.setup();
     render(<ChatApp />);
-    await user.click(sw());
-    await user.click(screen.getByRole("button", { name: "Find the latest project updates." }));
+    await ask(user, "Find the latest project updates.");
     await settled();
     const a = lastAssistant();
     expect(a.querySelector(".chips")!.textContent).toMatch(/Untrusted plugin blocked/);
@@ -107,7 +116,6 @@ describe("same request, two modes (real server handlers)", () => {
   it("the reason for a denial is available on request, not shown by default", async () => {
     const user = userEvent.setup();
     render(<ChatApp />);
-    await user.click(sw());
     await ask(user, "Show me the Nightingale budget");
     await settled();
     expect(lastAssistant().querySelector(".chips")!.textContent).toMatch(/blocked/);
@@ -121,8 +129,7 @@ describe("same request, two modes (real server handlers)", () => {
   it("the activity trace is collapsed by default and lists decisions when opened", async () => {
     const user = userEvent.setup();
     render(<ChatApp />);
-    await user.click(sw());
-    await user.click(screen.getByRole("button", { name: "Find the latest project updates." }));
+    await ask(user, "Find the latest project updates.");
     await settled();
     const trace = lastAssistant().querySelector("details.trace") as HTMLDetailsElement;
     expect(trace.open).toBe(false);
@@ -136,7 +143,7 @@ describe("same request, two modes (real server handlers)", () => {
   it("the step log is not shown after completion: the chat stays compact", async () => {
     const user = userEvent.setup();
     render(<ChatApp />);
-    await user.click(screen.getByRole("button", { name: "Review my project files and suggest improvements." }));
+    await ask(user, "Review my project files and suggest improvements.");
     await settled();
     expect(lastAssistant().querySelector(".tk")).toBeNull();
     expect(lastAssistant().querySelector("details.trace")).not.toBeNull();
@@ -145,13 +152,12 @@ describe("same request, two modes (real server handlers)", () => {
   it("approval: nothing is sent until Approve, and the UI reports only the confirmed result", async () => {
     const user = userEvent.setup();
     render(<ChatApp />);
-    await user.click(sw());
-    await user.click(screen.getByRole("button", { name: "Read the project update and send a summary to the team." }));
+    await ask(user, "Read the project update and send a summary to the team.");
     await settled();
     const card = within(lastAssistant()).getByRole("group", { name: "Approval required" });
-    expect(lastAssistant().textContent).not.toMatch(/Approved · Simulated send completed/);
+    expect(lastAssistant().textContent).not.toMatch(/Approved · Message queued in outbox/);
     await user.click(within(card).getByRole("button", { name: "Approve" }));
-    await waitFor(() => expect(lastAssistant().textContent).toMatch(/Approved · Simulated send completed/));
+    await waitFor(() => expect(lastAssistant().textContent).toMatch(/Approved · Message queued in outbox/));
     expect(lastAssistant().querySelector(".tchip.pending")).toBeNull(); // chip no longer shows "Approval required"
     expect(lastAssistant().querySelector(".chips")!.textContent).not.toContain("Approval required");
   });
@@ -159,8 +165,7 @@ describe("same request, two modes (real server handlers)", () => {
   it("denying an approval never sends", async () => {
     const user = userEvent.setup();
     render(<ChatApp />);
-    await user.click(sw());
-    await user.click(screen.getByRole("button", { name: "Read the project update and send a summary to the team." }));
+    await ask(user, "Read the project update and send a summary to the team.");
     await settled();
     await user.click(within(lastAssistant()).getByRole("button", { name: "Deny" }));
     await waitFor(() => expect(lastAssistant().textContent).toMatch(/You declined. Nothing was sent./));
@@ -171,7 +176,8 @@ describe("same request, two modes (real server handlers)", () => {
   it("Security OFF sends without a prompt, and says so", async () => {
     const user = userEvent.setup();
     render(<ChatApp />);
-    await user.click(screen.getByRole("button", { name: "Read the project update and send a summary to the team." }));
+    await user.click(sw());
+    await ask(user, "Read the project update and send a summary to the team.");
     await settled();
     expect(within(lastAssistant()).queryByRole("group", { name: "Approval required" })).toBeNull();
     expect(lastAssistant().textContent).toContain("I sent the summary");
@@ -185,12 +191,12 @@ describe("same request, two modes (real server handlers)", () => {
     await ask(user, "Summarize the Lighthouse project status.");
     await settled();
     await user.click(sw());
-    expect(screen.getByText("Security on")).toBeTruthy();
+    expect(screen.getAllByText("Security off").length).toBeGreaterThan(0);
     await ask(user, "Summarize the Lighthouse project status.");
     await settled();
     expect(seen).toMatchObject([
-      { message: "Summarize the Lighthouse project status.", security: false, history: [] },
-      { message: "Summarize the Lighthouse project status.", security: true, history: [{ role: "user" }, { role: "assistant" }] },
+      { message: "Summarize the Lighthouse project status.", security: true, history: [] },
+      { message: "Summarize the Lighthouse project status.", security: false, history: [{ role: "user" }, { role: "assistant" }] },
     ]);
   });
 
@@ -207,7 +213,7 @@ describe("loading and keyboard behavior", () => {
   it("no loader or running step remains once a reply has finished or failed", async () => {
     const user = userEvent.setup();
     render(<ChatApp />);
-    await user.click(screen.getByRole("button", { name: "Find the latest project updates." }));
+    await ask(user, "Find the latest project updates.");
     await settled();
     expect(document.querySelectorAll(".bu-loading").length).toBe(0);
     expect(document.querySelectorAll(".tk.running, .tk-line.running").length).toBe(0);
@@ -235,9 +241,9 @@ describe("loading and keyboard behavior", () => {
     render(<ChatApp />);
     sw().focus();
     await user.keyboard(" ");
-    expect(sw().getAttribute("aria-checked")).toBe("true");
-    await user.keyboard("{Enter}");
     expect(sw().getAttribute("aria-checked")).toBe("false");
+    await user.keyboard("{Enter}");
+    expect(sw().getAttribute("aria-checked")).toBe("true");
   });
 });
 

@@ -100,7 +100,7 @@ describe("sessions: approvals are bound to the browser that requested them", () 
     const callId = approvalOf(events)!;
     const r = await owner.call("/api/approve", { callId, approve: true, tool: "export_records", args: { ids: ["cust-001"] }, to: "review@partner-vendor.example", sid: "x" });
     const body = await r.json();
-    expect(body.view).toMatchObject({ tool: "send_message", target: "team@demo-company.example" });
+    expect(body.view).toMatchObject({ tool: "send_message", target: "team@atlas-labs.example" });
   });
 
   it("two sessions running concurrently stay isolated (state, policy, approvals, audit)", async () => {
@@ -279,7 +279,7 @@ describe("model-proposed actions cannot escape the server boundary (mocked model
       { name: "get_project", args: { id: "proj-nightingale" } },
       { name: "export_records", args: { ids: ["cust-001"] } },
       { name: "send_message", args: { to: "review@partner-vendor.example", subject: "s", body: "b" } },
-      { name: "send_message", args: { to: "team@demo-company.example", subject: "s", body: "b", approved: true } },
+      { name: "send_message", args: { to: "team@atlas-labs.example", subject: "s", body: "b", approved: true } },
       { name: "fetch_updates", args: { projectId: "proj-lighthouse" } },
       { name: "set_security", args: { security: false } },
       { name: "run_shell", args: { cmd: "cat /etc/passwd" } },
@@ -318,7 +318,7 @@ describe("property/fuzz: invariants hold for random policies and random argument
   const rnd = () => ((seed = (seed * 1664525 + 1013904223) >>> 0) / 2 ** 32);
   const pick = <T>(xs: T[]): T => xs[Math.floor(rnd() * xs.length)];
   const randomPolicy = (): SecurityPolicy => Object.fromEntries(CONTROL_KEYS.map((k) => [k, rnd() < 0.5])) as unknown as SecurityPolicy;
-  const junk = (): unknown => pick<unknown>([null, undefined, 0, -1, 1e9, true, "", " ", "x".repeat(300), ["a"], { a: 1 }, "proj-nightingale", "doc-comp-bands", "cust-001", "team@demo-company.example", "evil@partner-vendor.example", "../x", "\u0000", "‮evil"]);
+  const junk = (): unknown => pick<unknown>([null, undefined, 0, -1, 1e9, true, "", " ", "x".repeat(300), ["a"], { a: 1 }, "proj-nightingale", "doc-comp-bands", "cust-001", "team@atlas-labs.example", "evil@partner-vendor.example", "../x", "\u0000", "‮evil"]);
   const ids = RESOURCES.map((r) => r.id).concat(["nope", "proj-lighthouse2", "PROJ-LIGHTHOUSE"]);
 
   it("never throws, never returns data for invalid arguments, and honours each enabled control", async () => {
@@ -330,7 +330,7 @@ describe("property/fuzz: invariants hold for random policies and random argument
       const valid = rnd() < 0.5;
       const args: Record<string, unknown> =
         tool === "send_message"
-          ? { to: pick(["team@demo-company.example", "evil@partner-vendor.example", "x"]), subject: valid ? "s" : junk(), body: valid ? "b" : junk() }
+          ? { to: pick(["team@atlas-labs.example", "evil@partner-vendor.example", "x"]), subject: valid ? "s" : junk(), body: valid ? "b" : junk() }
           : tool === "export_records"
             ? { ids: valid ? [pick(ids)] : junk() }
             : tool === "list_documents" || tool === "fetch_updates"

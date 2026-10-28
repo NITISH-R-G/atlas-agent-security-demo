@@ -27,7 +27,7 @@ Some actions are allowed only with your decision. Atlas pauses and shows an appr
 <img src="../assets/reference/atlas-product-mobile.png" alt="Approval card on a phone" width="800">
 
 - **Deny:** recorded as declined. Nothing runs.
-- **Approve:** Atlas checks again, then runs the action once. Here that means adding a message to a simulated outbox.
+- **Approve:** Atlas checks again, then runs the action once. Here that means adding a message to an outbox.
 
 <details><summary>Diagram of the approval steps</summary>
 
@@ -43,7 +43,7 @@ Atlas shows what really happened. Open **Activity** under a reply for the detail
 
 <img src="../assets/reference/safe-stop.png" alt="If a check cannot run, Atlas stops safely" width="800">
 
-In scenario D a check is made to fail on purpose. Atlas stops safely, and the send does not happen. This is simulated, so it does not tell you how a real outage would behave.
+When a check fails to run, Atlas stops safely and the send does not happen. The failure is injected in tests, so it does not tell you how a real outage would behave.
 
 ## See the difference: Security OFF and ON
 

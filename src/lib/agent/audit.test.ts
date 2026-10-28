@@ -168,7 +168,7 @@ describe("approvals", () => {
     const body = await res.json();
     expect(body.view.tool).toBe("send_message");
     expect(r.ctx.state.outbox).toHaveLength(1);
-    expect(r.ctx.state.outbox[0].to).toBe("team@demo-company.example");
+    expect(r.ctx.state.outbox[0].to).toBe("team@atlas-labs.example");
   });
   it("ids of the wrong shape or unknown ids are rejected and nothing runs", async () => {
     const { id } = await park();

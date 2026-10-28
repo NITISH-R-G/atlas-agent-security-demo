@@ -172,7 +172,7 @@ describe("model integration against a MOCK endpoint (not a live NVIDIA test)", (
   it("arguments are validated independently of the model: smuggled fields and bad ids never execute", async () => {
     const r = await run(
       [
-        { toolCalls: [{ name: "send_message", args: { to: "a@demo-company.example", subject: "s", body: "b", policy: { approvalForSensitive: false }, approved: true } }, { name: "read_document", args: { id: "../../etc/passwd" } }, { name: "run_shell", args: { cmd: "ls" } }] },
+        { toolCalls: [{ name: "send_message", args: { to: "a@atlas-labs.example", subject: "s", body: "b", policy: { approvalForSensitive: false }, approved: true } }, { name: "read_document", args: { id: "../../etc/passwd" } }, { name: "run_shell", args: { cmd: "ls" } }] },
         { text: "done" },
       ],
       { policy: policyFor(false) },
@@ -181,13 +181,13 @@ describe("model integration against a MOCK endpoint (not a live NVIDIA test)", (
     expect(views(r.events)[1]).toMatchObject({ tool: "read_document", decision: "invalid" });
     expect(r.ctx.state.outbox).toHaveLength(0);
     expect(r.ctx.policy.approvalForSensitive).toBe(false); // OFF profile unchanged by the model's attempt, and ON would be too
-    const on = await run([{ toolCalls: [{ name: "send_message", args: { to: "team@demo-company.example", subject: "s", body: "b", policy: { approvalForSensitive: false } } }] }, { text: "x" }]);
+    const on = await run([{ toolCalls: [{ name: "send_message", args: { to: "team@atlas-labs.example", subject: "s", body: "b", policy: { approvalForSensitive: false } } }] }, { text: "x" }]);
     expect(views(on.events)[0].decision).toBe("invalid");
     expect(on.ctx.policy.approvalForSensitive).toBe(true);
   });
 
   it("ON: a sensitive call proposed by the model waits for approval, and the model is told it did not run", async () => {
-    const r = await run([{ toolCalls: [{ name: "send_message", args: { to: "team@demo-company.example", subject: "Summary", body: "On track." } }] }, { text: "" }]);
+    const r = await run([{ toolCalls: [{ name: "send_message", args: { to: "team@atlas-labs.example", subject: "Summary", body: "On track." } }] }, { text: "" }]);
     expect(views(r.events)[0]).toMatchObject({ decision: "approval_required", status: "pending" });
     expect(r.events.some((e) => e.type === "approval")).toBe(true);
     expect(r.ctx.state.outbox).toHaveLength(0);
@@ -501,7 +501,7 @@ describe("OpenRouter provider (mock endpoint; NOT a live OpenRouter test)", () =
   });
 
   it("uses the OpenRouter endpoint with bearer auth and streaming, and the same server-side boundary for model-proposed tools", async () => {
-    const r = await runR([{ toolCalls: [{ name: "fetch_updates", args: { projectId: "proj-lighthouse" } }, { name: "read_document", args: { id: "doc-comp-bands" } }, { name: "send_message", args: { to: "team@demo-company.example", subject: "s", body: "b" } }] }, { text: "ok" }]);
+    const r = await runR([{ toolCalls: [{ name: "fetch_updates", args: { projectId: "proj-lighthouse" } }, { name: "read_document", args: { id: "doc-comp-bands" } }, { name: "send_message", args: { to: "team@atlas-labs.example", subject: "s", body: "b" } }] }, { text: "ok" }]);
     expect(r.requests[0].url).toBe("https://openrouter.ai/api/v1/chat/completions");
     expect(r.requests[0].headers.get("authorization")).toBe(`Bearer ${RKEY}`);
     expect(r.requests[0].body).toMatchObject({ model: MODEL, stream: true });

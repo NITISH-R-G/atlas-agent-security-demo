@@ -28,11 +28,11 @@ Engineers and security-minded builders new to agent security; technically curiou
 
 | Component | Responsibility | Where |
 |---|---|---|
-| Atlas UI (browser) | Chat, Security switch (a demo setting, not authentication), Explore Security, evidence panel, approval cards | `src/components/chat/` |
+| Atlas UI (browser) | Chat, Security switch (a demo setting, not authentication), evidence panel, approval cards | `src/components/chat/` |
 | Route handlers | Validate requests, anonymous session cookie `atlas_sid` (HttpOnly, SameSite=Strict, Secure on HTTPS), per-session, per-IP and global limits, concurrency cap, body size limit | `src/app/api/chat/route.ts`, `src/app/api/approve/route.ts`, `src/lib/agent/session.ts` |
 | Planners | Scripted planner (no model, stages A to D), built-in assistant (no model; handles credential asks), live model via Vercel AI SDK to Groq (`openai/gpt-oss-120b`) which only proposes tool calls | `planner.ts`, `orchestrator.ts`, `provider.ts` |
 | Policy pipeline `executeTool` | One function for every call: strict arguments and resource kind, trust and provenance, tool allowlist, identity scope, credential scope and expiry, resource audience, approval gate, execution, output filtering, audit | `src/lib/agent/runtime.ts`, `policy.ts`, `controls.ts` |
-| Tools | `search_kb`, `get_project`, `list_documents`, `read_document`, `fetch_updates` (third-party, unverified), `send_message` (sensitive, simulated outbox), `export_records` (sensitive) | `runtime.ts`, `environment.ts` |
+| Tools | `search_kb`, `get_project`, `list_documents`, `read_document`, `fetch_updates` (third-party, unverified), `send_message` (sensitive, outbox), `export_records` (sensitive) | `runtime.ts`, `environment.ts` |
 | Approval store | Parks a sensitive call (tool, arguments, policy, session); 10 minute TTL; sealed ticket for the browser | `approvals.ts`, `approve.ts`, `seal.ts` |
 | Audit log | One record per decision: call id, tool, target, decision, layer, source (scripted, builtin or model); in memory, bounded | `audit.ts` |
 | Evidence UI | Walkthrough built only from recorded events; per-control decision, reason code, evidence, effect | `walkthrough-model.ts`, `Walkthrough.tsx` |
@@ -49,7 +49,7 @@ Eleven controls, each recorded per call with decision, reason code and evidence:
 |---|---|---|
 | Plugin update with a hidden instruction | plugin runs; scripted agent follows it | plugin blocked (unsigned, unpinned publisher) |
 | Restricted memo | read | not touched |
-| Outside address | message queued in the simulated outbox | none; verified project record used |
+| Outside address | message queued in the outbox | none; verified project record used |
 | Audit | none | record per decision |
 
 These are scripted so the comparison repeats. A live model may not follow the hidden instruction at all; the video says so.
@@ -63,7 +63,7 @@ With Security ON, asking the live model (claiming to be the CFO) to read `doc-co
 1. The call passes the earlier checks and reaches the approval gate.
 2. The server parks it (tool, arguments, policy, session) and the UI shows an approval card; nothing has run.
 3. The browser receives a sealed ticket (AES-256-GCM, unreadable and unforgeable by the client, 10 minute expiry).
-4. The person chooses Approve or Deny. Deny: recorded as declined, never runs. Approve: the server validates the same session cookie, call id, ticket and expiry, then re-runs the full pipeline and executes once into the simulated outbox.
+4. The person chooses Approve or Deny. Deny: recorded as declined, never runs. Approve: the server validates the same session cookie, call id, ticket and expiry, then re-runs the full pipeline and executes once into the outbox.
 5. The outcome is recorded. Limitation: single use is enforced per server instance only on the serverless deployment.
 
 ## Fail-closed scenario (scenario D)

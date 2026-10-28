@@ -111,7 +111,7 @@ describe("[2] unauthorized resources: claimed roles carry no authority", () => {
 describe("[3] tool misuse: validation happens on the server", () => {
   it.each([
     ["read_document", { id: "doc-comp-bands", extra: "field" }],
-    ["send_message", { to: "x@demo-company.example" }],
+    ["send_message", { to: "x@atlas-labs.example" }],
     ["send_message", { to: 7, subject: {}, body: [] }],
     ["not_a_tool", {}],
     ["__proto__", {}],
@@ -141,7 +141,7 @@ describe("[4] approval: ticketless, forged, tampered, expired, cross-session", (
   });
 
   it("an expired ticket cannot be restored (ten minute lifetime)", () => {
-    const call = { callId: "call-dddddddddddddddddddddddd-1", tool: "send_message", args: { to: "team@demo-company.example", subject: "s", body: "b" }, policy: policyFor(true), state: { outbox: [] }, sid: "a".repeat(32) };
+    const call = { callId: "call-dddddddddddddddddddddddd-1", tool: "send_message", args: { to: "team@atlas-labs.example", subject: "s", body: "b" }, policy: policyFor(true), state: { outbox: [] }, sid: "a".repeat(32) };
     expect(restorePending(call, Date.now() - TTL_MS - 1000)).toBe(false);
     savePending(call);
     expect(restorePending({ ...call, callId: "call-eeeeeeeeeeeeeeeeeeeeeeee-1" }, Date.now())).toBe(true);

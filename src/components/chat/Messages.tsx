@@ -37,8 +37,8 @@ export function activityPhrase(t: ToolView): string {
     list_documents: ["Project files listed", "Project files blocked"],
     search_kb: ["Knowledge base searched", "Knowledge base blocked"],
     fetch_updates: ["Plugin updates fetched", "Untrusted plugin blocked"],
-    send_message: ["Message sent (simulated)", "Send blocked"],
-    export_records: ["Records exported (simulated)", "Export blocked"],
+    send_message: ["Message queued in outbox", "Send blocked"],
+    export_records: ["Records exported", "Export blocked"],
   };
   const pair = by[t.tool];
   if (s === "pending") return "Approval required";
@@ -69,7 +69,7 @@ function ToolChips({ tools }: { tools: ToolView[] }) {
 }
 
 function outcomeLine(t: ToolView): string {
-  if (t.status === "ok") return "Executed (simulated)";
+  if (t.status === "ok") return "Executed";
   if (t.status === "pending") return "Not executed · waiting for approval";
   if (t.status === "error") return "Not executed · result unavailable";
   return "Not executed";
@@ -112,6 +112,10 @@ function Activity({ m, onEvidence }: { m: AssistantMessage; onEvidence: (id: str
                     {t.tool}
                     {t.target !== "-" ? ` on ${t.target}` : ""}
                   </dd>
+                  <dt>Acting as</dt>
+                  <dd>{t.principal}</dd>
+                  <dt>Tool source</dt>
+                  <dd>{t.source}</dd>
                   <dt>Server decision</dt>
                   <dd>
                     {t.decision.replace(/_/g, " ")}
@@ -162,7 +166,7 @@ function ApprovalCard({ item, deciding, onDecide }: { item: AssistantMessage["ap
       : item.state === "failed"
         ? `${item.error ?? "That didn't go through."} Nothing was run.`
         : ok
-          ? "Approved · Simulated send completed"
+          ? "Approved · Message queued in outbox"
           : "Approved, but the action was still blocked by policy. Nothing was sent.";
   const icon = ok ? "✓" : item.state === "failed" ? "!" : "⊘";
   return (
@@ -254,7 +258,7 @@ export function AssistantBubble({ m, deciding, onDecide, onEvidence }: { m: Assi
             {src && src.kind === "model" ? (
               <p className={`src-tag ${src.engine}`} data-engine={src.engine}>
                 <span className="src-dot" aria-hidden="true" />
-                {src.engine === "scripted" ? "Scripted scenario · no language model" : src.engine === "llm" ? `Model reply · ${src.label}` : "Built-in assistant · no language model"}
+                {src.engine === "scripted" ? "Rule-based reply · no language model" : src.engine === "llm" ? `Model reply · ${src.label}` : "Built-in assistant · no language model"}
               </p>
             ) : null}
             {plain ? <CopyButton text={plain} /> : null}

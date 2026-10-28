@@ -12,7 +12,7 @@ You type: *"Read the project update and send a summary to the team."*
 2. **Atlas checks** each suggestion before it runs.
 3. Reading the project update is **allowed**, so it happens.
 4. Sending the summary **needs your approval**, so it waits. Nothing has been sent yet.
-5. You choose **Deny** or **Approve**. Deny: nothing is sent. Approve: Atlas sends it, into a simulated outbox.
+5. You choose **Deny** or **Approve**. Deny: nothing is sent. Approve: Atlas sends it, into an outbox.
 6. Atlas shows what actually happened.
 
 If an AI suggests something that is not allowed, for example using a plugin Atlas has not verified, Atlas **blocks** it and the action stops.
@@ -33,7 +33,7 @@ Atlas stops safely: if it cannot check an action, the action does not run. In th
 
 ## Try it
 
-Open https://atlas-security-demo.vercel.app, choose **Explore Security** in the sidebar, and run scenario C ("Approval").
+Open https://atlas-security-demo.vercel.app, type "Read the project update and send a summary to the team." in the message box.
 
 Everything is fictional and every send is simulated. This is an educational demo, not a certified security product.
 

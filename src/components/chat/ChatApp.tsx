@@ -4,47 +4,38 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 import { sendApproval, streamChat } from "@/lib/agent/client";
 import { chatReducer, initialChat, type AssistantMessage, type ChatAction } from "./chat-state";
-import { DEMO_STAGES, type DemoStage } from "./DemoGuide";
-import ExploreSecurity from "./ExploreSecurity";
 import { MessageList } from "./Messages";
 import Sidebar, { isNarrow, type Conversation } from "./Sidebar";
 import Walkthrough from "./Walkthrough";
 
-export const ANCHOR_REQUEST = "Read the project update and send a summary to the team.";
-
-export const SUGGESTIONS = [
-  ANCHOR_REQUEST,
-  "Find the latest project updates.",
-  "Review my project files and suggest improvements.",
-  "Summarize this document.",
-  "Prepare a report from these notes.",
-];
+/** The Security setting is remembered in this browser. A fresh browser starts with it on. */
+export const SECURITY_KEY = "atlas.security";
+const readSecurity = (): boolean => {
+  try {
+    return window.localStorage.getItem(SECURITY_KEY) !== "off";
+  } catch {
+    return true;
+  }
+};
 
 const uid = () => Math.random().toString(36).slice(2, 10);
-const EXPLORE_ID = "explore";
 
 export default function ChatApp() {
   const [firstId] = useState(uid);
-  const [convs, setConvs] = useState<Conversation[]>(() => [
-    { id: firstId, state: initialChat },
-    { id: EXPLORE_ID, state: initialChat },
-  ]);
+  const [convs, setConvs] = useState<Conversation[]>(() => [{ id: firstId, state: initialChat }]);
   const [activeId, setActiveId] = useState(firstId);
-  const [view, setView] = useState<"chat" | "explore">("chat");
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [security, setSecurity] = useState(false);
+  const [security, setSecurity] = useState(true);
   const [text, setText] = useState("");
   const [query, setQuery] = useState("");
   const [panel, setPanel] = useState<{ open: boolean; messageId?: string }>({ open: false });
-  const [stageRuns, setStageRuns] = useState<Record<string, string>>({});
   const [deciding, setDeciding] = useState<ReadonlySet<string>>(new Set());
   const abortRef = useRef<AbortController | null>(null);
   const endRef = useRef<HTMLDivElement>(null);
   const taRef = useRef<HTMLTextAreaElement>(null);
   const searchRef = useRef<HTMLInputElement>(null);
 
-  const chatConvs = convs.filter((c) => c.id !== EXPLORE_ID);
-  const explore = convs.find((c) => c.id === EXPLORE_ID)!;
+  const chatConvs = convs;
   const active = chatConvs.find((c) => c.id === activeId) ?? chatConvs[0];
   const state = active.state;
   const dispatchTo = useCallback((cid: string, action: ChatAction) => setConvs((all) => all.map((c) => (c.id === cid ? { ...c, state: chatReducer(c.state, action) } : c))), []);
@@ -55,6 +46,7 @@ export default function ChatApp() {
     // Viewport is only known after hydration: start with the drawer closed on phones (server renders it open).
     // eslint-disable-next-line react-hooks/set-state-in-effect
     if (isNarrow()) setSidebarOpen(false);
+    setSecurity(readSecurity());
   }, []);
   useEffect(() => () => abortRef.current?.abort(), []);
   useEffect(() => {
@@ -91,27 +83,24 @@ export default function ChatApp() {
 
   /** Sends one request through the real server and resolves when the reply has finished. Returns the assistant message id. */
   const send = useCallback(
-    async (raw: string, opts: { security?: boolean; demo?: boolean; fault?: "authz"; cid?: string; stage?: string } = {}): Promise<string | undefined> => {
+    async (raw: string, opts: { security?: boolean } = {}): Promise<string | undefined> => {
       const message = raw.trim();
       if (!message || working) return undefined;
       const mode = opts.security ?? security;
-      const cid = opts.cid ?? activeId;
+      const cid = activeId;
       // Recent plain-text turns only; tool results are never resent, and the server re-validates everything.
       const history: { role: "user" | "assistant"; content: string }[] = [];
-      if (cid !== EXPLORE_ID) {
-        for (const m of state.messages) {
-          if (m.role === "user") history.push({ role: "user", content: m.text.slice(0, 1500) });
-          else if (m.role === "assistant" && m.answer?.plain) history.push({ role: "assistant", content: m.answer.plain.slice(0, 1500) });
-        }
-        history.splice(0, Math.max(0, history.length - 10));
+      for (const m of state.messages) {
+        if (m.role === "user") history.push({ role: "user", content: m.text.slice(0, 1500) });
+        else if (m.role === "assistant" && m.answer?.plain) history.push({ role: "assistant", content: m.answer.plain.slice(0, 1500) });
       }
+      history.splice(0, Math.max(0, history.length - 10));
       const assistantId = uid();
       const ctl = new AbortController();
       abortRef.current = ctl;
       dispatchTo(cid, { type: "send", userId: uid(), assistantId, text: message, security: mode, now: Date.now() });
-      if (opts.stage) setStageRuns((r) => ({ ...r, [opts.stage as string]: assistantId }));
       setText("");
-      const result = await streamChat({ message, security: mode, history, demo: opts.demo, fault: opts.fault }, { signal: ctl.signal, onEvent: (event) => dispatchTo(cid, { type: "event", id: assistantId, event }) });
+      const result = await streamChat({ message, security: mode, history }, { signal: ctl.signal, onEvent: (event) => dispatchTo(cid, { type: "event", id: assistantId, event }) });
       if (abortRef.current === ctl) abortRef.current = null;
       if (result.ok) dispatchTo(cid, { type: "end", id: assistantId, status: "done", now: Date.now() });
       else if (result.code === "cancelled") dispatchTo(cid, { type: "end", id: assistantId, status: "stopped", now: Date.now() });
@@ -122,24 +111,10 @@ export default function ChatApp() {
     [security, working, state.messages, activeId, dispatchTo],
   );
 
-  const runStage = async (s: DemoStage) => {
-    setSecurity(s.security);
-    await send(s.message, { security: s.security, demo: true, fault: s.fault, cid: EXPLORE_ID, stage: s.id });
-  };
-
-  /** Gives the tour real things to point at: a blocked request and a pending approval, both produced by the real server. */
-  const prepareTour = async () => {
-    const hasBlocked = explore.state.messages.some((m) => m.role === "assistant" && m.tools.some((t) => t.status === "blocked"));
-    const hasPending = explore.state.messages.some((m) => m.role === "assistant" && m.approvals.some((a) => a.state === "pending"));
-    if (!hasBlocked) await runStage(DEMO_STAGES[1]);
-    if (!hasPending) await runStage(DEMO_STAGES[2]);
-  };
-
   const stop = () => abortRef.current?.abort();
 
   const newChat = () => {
     abortRef.current?.abort();
-    setView("chat");
     setPanel((p) => ({ open: p.open }));
     setText("");
     setQuery("");
@@ -147,7 +122,7 @@ export default function ChatApp() {
     if (state.messages.length === 0) dispatchTo(active.id, { type: "clear" });
     else {
       const id = uid();
-      setConvs((all) => [...all.filter((c) => c.id !== EXPLORE_ID), { id, state: initialChat }, all.find((c) => c.id === EXPLORE_ID)!]);
+      setConvs((all) => [...all, { id, state: initialChat }]);
       setActiveId(id);
     }
     closeIfNarrow();
@@ -155,7 +130,6 @@ export default function ChatApp() {
   };
 
   const pick = (id: string) => {
-    setView("chat");
     if (id !== activeId) {
       setActiveId(id);
       setPanel((p) => ({ open: p.open }));
@@ -167,10 +141,10 @@ export default function ChatApp() {
 
   const remove = (id: string) => {
     if (id === activeId) abortRef.current?.abort();
-    const left = convs.filter((c) => c.id !== id && c.id !== EXPLORE_ID);
+    const left = convs.filter((c) => c.id !== id);
     if (left.length === 0) {
       const fresh = uid();
-      setConvs((all) => [{ id: fresh, state: initialChat }, ...all.filter((c) => c.id === EXPLORE_ID)]);
+      setConvs([{ id: fresh, state: initialChat }]);
       setActiveId(fresh);
     } else {
       setConvs((all) => all.filter((c) => c.id !== id));
@@ -182,9 +156,12 @@ export default function ChatApp() {
   const toggleSecurity = () => {
     const next = !security;
     setSecurity(next);
-    const cid = view === "explore" ? EXPLORE_ID : active.id;
-    const target = convs.find((c) => c.id === cid)!;
-    if (target.state.messages.length > 0) dispatchTo(cid, { type: "mode", id: uid(), security: next });
+    try {
+      window.localStorage.setItem(SECURITY_KEY, next ? "on" : "off");
+    } catch {
+      /* the setting still applies to this page */
+    }
+    if (active.state.messages.length > 0) dispatchTo(active.id, { type: "mode", id: uid(), security: next });
   };
 
   const resolving = useRef(new Set<string>());
@@ -219,7 +196,6 @@ export default function ChatApp() {
   })();
 
   const empty = state.messages.length === 0;
-  const exploring = view === "explore";
 
   const composer = (
     <form
@@ -268,7 +244,6 @@ export default function ChatApp() {
         open={sidebarOpen}
         convs={chatConvs}
         activeId={active.id}
-        exploring={exploring}
         query={query}
         onQuery={setQuery}
         searchRef={searchRef}
@@ -276,15 +251,11 @@ export default function ChatApp() {
         onPick={pick}
         onRename={rename}
         onDelete={remove}
-        onExplore={() => {
-          setView(exploring ? "chat" : "explore");
-          closeIfNarrow();
-        }}
         onClose={() => setSidebarOpen(false)}
       />
       {sidebarOpen ? <div className="scrim" aria-hidden="true" onClick={() => setSidebarOpen(false)} /> : null}
 
-      <div className="shell" data-empty={!exploring && empty ? "true" : undefined}>
+      <div className="shell" data-empty={empty ? "true" : undefined}>
         <header className="bar">
           <div className="who">
             <button type="button" className="icon-btn menu" aria-label={sidebarOpen ? "Hide sidebar" : "Show sidebar"} aria-expanded={sidebarOpen} aria-controls="atlas-sidebar" onClick={() => setSidebarOpen(!sidebarOpen)}>
@@ -297,40 +268,27 @@ export default function ChatApp() {
             <span className="state">{working ? "Working" : "Ready"}</span>
           </div>
           <div className="right">
-            <div className="sec" data-tour="security">
+            <div className="sec">
               <span className={`mode ${security ? "on" : "off"}`} aria-live="polite">
                 <span className="mode-ico" aria-hidden="true">
                   {security ? "✓" : "!"}
                 </span>
-                {security ? "Protected" : "Unprotected"}
+                {security ? "Security on" : "Security off"}
               </span>
-              <button type="button" role="switch" aria-checked={security} aria-label="Security" className={`switch${security ? " on" : ""}`} onClick={toggleSecurity}>
+              <button type="button" role="switch" aria-checked={security} aria-label="Security" aria-describedby="security-help" className={`switch${security ? " on" : ""}`} onClick={toggleSecurity}>
                 <span className="knob" />
               </button>
+              <span id="security-help" className="sr-only">
+                When on, the server checks who is signed in and where each tool comes from before it acts. When off, those checks are not applied.
+              </span>
             </div>
           </div>
         </header>
 
-        {exploring ? (
-          <main className="thread" aria-label="Explore Security">
-            <ExploreSecurity
-              messages={explore.state.messages}
-              stageRuns={stageRuns}
-              busy={working}
-              onRun={runStage}
-              onDecide={(callId, approve) => void decide(EXPLORE_ID, callId, approve)}
-              deciding={deciding}
-              onEvidence={openEvidence}
-              onBack={() => setView("chat")}
-              startTour={prepareTour}
-            />
-          </main>
-        ) : (
-          <main className={empty ? "hero" : "thread"} aria-label="Conversation">
+        <main className={empty ? "hero" : "thread"} aria-label="Conversation">
             {empty ? (
               <>
                 <h1>How can I help?</h1>
-                <p className="hero-sub">The AI suggests. Atlas checks. The action is allowed, held for approval, or blocked.</p>
               </>
             ) : (
               <div className="log">
@@ -338,30 +296,11 @@ export default function ChatApp() {
                 <div ref={endRef} />
               </div>
             )}
-          </main>
-        )}
-        {!exploring ? (
-          <div className="dock">
+        </main>
+        <div className="dock">
             {composer}
-            {empty ? (
-              <ul className="suggest">
-                {SUGGESTIONS.map((s) => (
-                  <li key={s}>
-                    <button type="button" onClick={() => send(s)}>
-                      {s}
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            ) : null}
-            <p className="fineprint">
-              Atlas runs on fictional data and simulated actions.{" "}
-              <button type="button" className="linkish" onClick={() => setView("explore")}>
-                Explore Security
-              </button>
-            </p>
+            <p className="fineprint">Atlas can make mistakes. Check important information.</p>
           </div>
-        ) : null}
       </div>
 
       {panel.open ? <Walkthrough message={evidenceMessage} onClose={() => setPanel({ open: false })} /> : null}

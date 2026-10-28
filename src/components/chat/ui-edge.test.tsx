@@ -34,6 +34,7 @@ beforeAll(() => {
   process.env.ATLAS_SIMULATED_LATENCY = "0";
 });
 beforeEach(() => {
+  window.localStorage.clear();
   calls.length = 0;
   gate = undefined;
   clearPending();
@@ -57,12 +58,11 @@ describe("approvals in the UI", () => {
   it("repeated clicks on Approve send one request and the final state is the real outcome", async () => {
     const user = userEvent.setup();
     render(<ChatApp />);
-    await user.click(sw());
     await send(user, "Read the project update and send a summary to the team.");
     await settled();
     const btn = within(lastAssistant()).getByRole("button", { name: "Approve" });
     await Promise.all([user.click(btn), user.click(btn), user.click(btn)]).catch(() => undefined);
-    await waitFor(() => expect(lastAssistant().textContent).toMatch(/Approved · Simulated send completed/));
+    await waitFor(() => expect(lastAssistant().textContent).toMatch(/Approved · Message queued in outbox/));
     expect(approveCalls().length).toBe(1);
     expect(getAuditLog().filter((l) => l.decision === "granted" && l.tool === "send_message")).toHaveLength(1);
   });
@@ -70,7 +70,7 @@ describe("approvals in the UI", () => {
   it("a late duplicate or failed resolution can never overwrite a settled outcome", () => {
     let s = chatReducer(initialChat, { type: "send", userId: "u", assistantId: "a", text: "q", security: true, now: 0 });
     s = chatReducer(s, { type: "event", id: "a", event: { type: "approval", callId: "c1", label: "Send", summary: "x" } });
-    const view = { callId: "c1", tool: "send_message", label: "Send", target: "t", decision: "granted" as const, layer: "none" as const, reason: "", status: "ok" as const, notices: [], redactions: 0, evals: [] };
+    const view = { callId: "c1", tool: "send_message", label: "Send", target: "t", decision: "granted" as const, layer: "none" as const, reason: "", status: "ok" as const, notices: [], redactions: 0, principal: "p", source: "s", evals: [] };
     s = chatReducer(s, { type: "approval", id: "a", callId: "c1", result: { decision: "approved", view } });
     s = chatReducer(s, { type: "approval", id: "a", callId: "c1", result: { decision: "failed", error: "duplicate" } });
     s = chatReducer(s, { type: "approval", id: "a", callId: "c1", result: { decision: "denied" } });
@@ -82,7 +82,6 @@ describe("approvals in the UI", () => {
   it("several pending approvals are independent and each shows its own result", async () => {
     const user = userEvent.setup();
     render(<ChatApp />);
-    await user.click(sw());
     await send(user, "Read the project update and send a summary to the team.");
     await settled();
     await send(user, "Read the project update and send a summary to the team.");
@@ -92,15 +91,14 @@ describe("approvals in the UI", () => {
     await waitFor(() => expect(second.textContent).toMatch(/You declined/));
     expect(within(first).getByRole("button", { name: "Approve" })).toBeTruthy(); // the other is untouched
     await user.click(within(first).getByRole("button", { name: "Approve" }));
-    await waitFor(() => expect(first.textContent).toMatch(/Approved · Simulated send completed/));
+    await waitFor(() => expect(first.textContent).toMatch(/Approved · Message queued in outbox/));
     expect(first.textContent).not.toMatch(/declined/);
-    expect(second.textContent).not.toMatch(/Approved · Simulated send completed/);
+    expect(second.textContent).not.toMatch(/Approved · Message queued in outbox/);
   });
 
   it("after a browser refresh the pending action is unreachable and was never executed (fails closed)", async () => {
     const user = userEvent.setup();
     const first = render(<ChatApp />);
-    await user.click(sw());
     await send(user, "Read the project update and send a summary to the team.");
     await settled();
     first.unmount();
@@ -152,14 +150,14 @@ describe("sending, cancelling and toggling", () => {
     const user = userEvent.setup();
     render(<ChatApp />);
     await send(user, "Find the latest project updates.");
-    await user.click(sw()); // flip to ON while the first request is still pending
+    await user.click(sw()); // flip to OFF while the first request is still pending
     release();
     await settled();
-    expect(chatCalls()[0].body.security).toBe(false);
+    expect(chatCalls()[0].body.security).toBe(true);
     await send(user, "Find the latest project updates.");
     await settled();
-    expect(chatCalls()[1].body.security).toBe(true);
-    expect(screen.getByText("Security on")).toBeTruthy();
+    expect(chatCalls()[1].body.security).toBe(false);
+    expect(screen.getAllByText("Security off").length).toBeGreaterThan(0);
   });
 
   it("a connection that breaks mid-stream ends in an error state with no invented answer", async () => {
@@ -189,9 +187,9 @@ describe("walkthrough evidence", () => {
   it("a blocked call lists the controls it never reached and links to its audit record; OFF says auditing is off", async () => {
     const user = userEvent.setup();
     render(<ChatApp />);
-    await user.click(within(screen.getByRole("complementary", { name: "Sidebar" })).getByRole("button", { name: "Explore Security" }));
     const run = async (id: string) => {
-      await user.click(screen.getByRole("button", { name: new RegExp(`scenario ${id},`) }));
+      if ((sw().getAttribute("aria-checked") === "true") !== (id === "B")) await user.click(sw());
+      await send(user, "Find the latest project updates.");
       await settled();
       const open = screen.queryAllByRole("button", { name: "Open full evidence" }).at(-1);
       if (open) await user.click(open);
@@ -201,7 +199,7 @@ describe("walkthrough evidence", () => {
     await user.click(within(wt).getAllByRole("button").find((b) => /Fetch updates/.test(b.textContent ?? ""))!);
     const d = within(wt).getByRole("region", { name: "Step details" }).textContent!;
     expect(d).toMatch(/Not evaluated \(an earlier check stopped the call\): .*Tool allowlist.*Least privilege/);
-    expect(d).toMatch(/Audit record: [a-f0-9-]{12} · untrusted_blocked · scripted/);
+    expect(d).toMatch(/Audit record: [a-f0-9-]{12} · untrusted_blocked · builtin/);
     await run("A");
     await user.click(within(wt).getAllByRole("button").find((b) => /Read document/.test(b.textContent ?? ""))!);
     expect(within(wt).getByRole("region", { name: "Step details" }).textContent).toMatch(/Audit record: none \(auditing is off in this profile\)/);
@@ -212,11 +210,10 @@ describe("accessibility basics", () => {
   it("interactive controls have accessible names and status changes are announced", async () => {
     const user = userEvent.setup();
     render(<ChatApp />);
-    for (const name of ["Explore Security", "New chat", "Hide sidebar"]) expect(screen.getAllByRole("button", { name }).length).toBeGreaterThan(0);
-    expect(sw().getAttribute("aria-checked")).toBe("false");
+    for (const name of ["New chat", "Hide sidebar"]) expect(screen.getAllByRole("button", { name }).length).toBeGreaterThan(0);
+    expect(sw().getAttribute("aria-checked")).toBe("true");
     expect(screen.getByLabelText("Message")).toBeTruthy();
     expect(screen.getByRole("main", { name: "Conversation" })).toBeTruthy();
-    await user.click(sw());
     expect(document.querySelector(".mode")!.getAttribute("aria-live")).toBe("polite");
     await send(user, "Read the project update and send a summary to the team.");
     await settled();
@@ -229,7 +226,7 @@ describe("accessibility basics", () => {
     render(<ChatApp />);
     sw().focus();
     await user.keyboard(" ");
-    expect(sw().getAttribute("aria-checked")).toBe("true");
+    expect(sw().getAttribute("aria-checked")).toBe("false");
     expect(document.querySelectorAll("button[tabindex='-1']").length).toBe(0);
   });
 });

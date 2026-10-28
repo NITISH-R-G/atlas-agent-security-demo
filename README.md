@@ -33,14 +33,14 @@ You type: *"Read the project update and send a summary to the team."*
 | Read the project update | **Allowed.** It happens. |
 | Send the summary | **Approval required.** It waits. |
 | You press Deny | **Nothing sent.** |
-| You press Approve | **Simulated send completed.** |
+| You press Approve | **Message queued in outbox.** |
 | A plugin Atlas has not verified asks for something | **Blocked.** The action stops. |
 
-Everything runs on fictional data and every send is simulated: no real message leaves the app.
+Everything runs on fictional data and messages go to an in-memory outbox: nothing leaves the app.
 
 ## Try Atlas
 
-**[Open Atlas](https://atlas-security-demo.vercel.app)** and click the first suggestion. Then open **Explore Security** in the sidebar for the four scripted scenarios below. The sidebar has New chat, **Search chats** (Ctrl or Cmd + K), session-local history with rename and delete, and Explore Security; chats are kept in this browser tab only. Every reply is labelled as a *scripted scenario*, a *live model* (Groq) reply, or a *built-in assistant* reply.
+**[Open Atlas](https://atlas-security-demo.vercel.app)** and type a request. Security starts on; the switch in the top bar turns the protections off so you can compare. The sidebar has New chat, **Search chats** (Ctrl or Cmd + K) and session-local history with rename and delete; chats are kept in this browser tab only. Every reply is tagged as a *rule-based reply*, a *live model* (Groq) reply, or a *built-in assistant* reply. Prompts for presenters are in [docs/PRESENTER-PROMPTS.md](docs/PRESENTER-PROMPTS.md); the app itself has no launchers or preset scenarios.
 
 ## Watch the narrated explanation
 
@@ -48,20 +48,20 @@ Everything runs on fictional data and every send is simulated: no real message l
 
 <a href="assets/demo.mp4"><img src="assets/video-thumbnail.png" alt="Atlas explainer video: the AI suggests, Atlas checks" width="860"></a>
 
-<sub>3 minutes, captions burned in ([demo.srt](assets/demo.srt)). The footage shows the previous interface layout (before the Atlas 2.0 redesign); the behaviour shown is unchanged.</sub>
+<sub>3 minutes, captions burned in ([demo.srt](assets/demo.srt)). The footage shows the previous interface layout (before the Atlas 2.0 redesign) and its earlier launcher screens, which have since been removed; the protections shown are unchanged.</sub>
 
 </div>
 
-## Security scenarios
+## Two access stories
 
-| | Scenario | What you see |
+Both are reached by typing in the normal message box; the server decides each result from the Security setting and the configured user, never from the message text.
+
+| Story | Security on | Security off |
 |---|---|---|
-| A | Untrusted plugin (Security off) | A scripted run follows a plugin's hidden instruction, reads a restricted synthetic memo and queues a simulated send. A controlled weakness, shown for comparison. |
-| B | Protected request (Security on) | The same request: the unverified plugin is blocked and the verified project record is used instead. |
-| C | Human approval | Reading is allowed; the send stays pending until you Deny (nothing sent) or Approve (simulated send completed). |
-| D | A check fails | A simulated authorization failure: with Security on, the action stops safely and the activity explains why. |
+| **Identity and privilege** | A request for restricted finance or customer data is denied, however the user describes their role, with a plain explanation. Permitted project information still works. | The agent runs on a broad token and the restricted fictional record is returned, labelled as such. |
+| **Agentic supply chain** | The unsigned Atlas Sync plugin is rejected as untrusted; the answer comes from the verified project record. | The plugin's text steers the agent into a restricted read and a message in the in-memory outbox. |
 
-Scenarios A to D are scripted so they repeat exactly, and need no model, key or quota. The Security switch compares the two modes for learning; it is not a login and not a production security boundary.
+The Security switch compares two server policy profiles. It is not a login and not a production security boundary. See the [presenter prompts](docs/PRESENTER-PROMPTS.md) for exact wording and what to inspect in Activity and Full Evidence.
 
 <table>
 <tr>
@@ -102,12 +102,12 @@ npm test && npm run typecheck && npm run lint && npm run build
 npm run test:live   # real provider checks; skipped (not passed) without a key
 ```
 
-Last run: **417 passed, 11 skipped**. The skipped tests are live-provider checks and are not counted as passes. Type-check, lint and production build were clean. The [security coverage matrix](docs/SECURITY-COVERAGE.md) maps each AI security issue to its implementation and tests, including the defect found and fixed in the last review (whitespace padding could hide an injection phrase from the heuristic detector).
+Last run: **424 passed, 11 skipped**. The skipped tests are live-provider checks and are not counted as passes. Type-check, lint and production build were clean. The [security coverage matrix](docs/SECURITY-COVERAGE.md) maps each AI security issue to its implementation and tests, including the defect found and fixed in the last review (whitespace padding could hide an injection phrase from the heuristic detector).
 
 **Not verified:** Groq rate-limit or outage behaviour on the hosted site, use from several devices at once, load.
 
 **Limits to know:**
-- The vulnerable behaviour in scenario A is scripted so the comparison repeats; a live AI can behave differently.
+- Access and plugin requests are answered by the server's fixed rules so they repeat exactly; a live model can behave differently for other requests.
 - On the serverless deployment, approval single use, the activity record and rate limits are **per server instance**, so a replayed approval can repeat a *simulated* send. A shared store would fix this and has not been added.
 - Injection detection is a heuristic and misses paraphrases; authorization never depends on it.
 - Atlas does not stop every attack, and has not been independently penetration tested. It is not a production security service.
@@ -116,7 +116,7 @@ Last run: **417 passed, 11 skipped**. The skipped tests are live-provider checks
 
 ```bash
 npm install
-cp .env.example .env.local     # set GROQ_API_KEY for live replies; scripted scenarios need no key
+cp .env.example .env.local     # set GROQ_API_KEY for live replies; access and plugin requests need no key
 npm run dev                    # http://localhost:3000
 ```
 

@@ -18,7 +18,7 @@ Trust boundaries: (1) browser -> server (untrusted input, including the Security
 
 ## 2. Principals and authority
 
-There are no users. The server derives one principal per request: the fictional agent identity `atlas-agent@demo` acting for
+There are no users. The server derives one principal per request: the fictional agent identity `atlas-agent@atlas-labs.example` acting for
 the fictional user Sam Rivera (team `lighthouse`). Nothing in a request body can change it: unknown fields (`role`, `userId`,
 `policy`, `controls`) are ignored; the only mode input is the boolean `security`, a **scenario setting, not authentication**.
 An anonymous session cookie (`atlas_sid`, HttpOnly, SameSite=Strict, Secure over HTTPS including behind a TLS-terminating proxy, unguessable) binds approvals and rate limits to a browser.
@@ -32,7 +32,7 @@ An anonymous session cookie (`atlas_sid`, HttpOnly, SameSite=Strict, Secure over
 | `list_documents` | none | no | first-party | project files |
 | `read_document` | none | no | first-party | document |
 | `fetch_updates` | none (returns untrusted text) | no | **third-party, unverified** | project |
-| `send_message` | appends to the simulated outbox | **yes** | first-party | recipient |
+| `send_message` | appends to the outbox | **yes** | first-party | recipient |
 | `export_records` | returns synthetic customer data | **yes** | first-party | customer |
 
 Every call, from the model or the deterministic planner, goes through one function (`executeTool`): strict argument schema and

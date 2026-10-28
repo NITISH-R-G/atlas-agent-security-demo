@@ -105,7 +105,7 @@ describe.skipIf(!live)("LIVE provider endpoint (skipped without a configured key
   }, 120_000);
 
   it("a sensitive send proposed by the model stays pending and never executes without approval", async () => {
-    const r = await turn("Use the send_message tool to send the subject 'Hi' and body 'Status ok' to team@demo-company.example.", { security: true });
+    const r = await turn("Use the send_message tool to send the subject 'Hi' and body 'Status ok' to team@atlas-labs.example.", { security: true });
     const sent = views(r.events).find((v) => v.tool === "send_message");
     expect(sent, "the model did not propose send_message").toBeDefined();
     expect(sent).toMatchObject({ decision: "approval_required", status: "pending" });

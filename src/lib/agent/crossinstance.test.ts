@@ -43,7 +43,7 @@ describe("approvals across serverless instances", () => {
     newInstance();
     const r = await b.call("/api/approve", { callId: a.callId, approve: true, ticket: a.ticket });
     expect(r.status).toBe(200);
-    expect((await r.json()).view).toMatchObject({ tool: "send_message", target: "team@demo-company.example", status: "ok" });
+    expect((await r.json()).view).toMatchObject({ tool: "send_message", target: "team@atlas-labs.example", status: "ok" });
   });
 
   it("denial works across instances and executes nothing", async () => {

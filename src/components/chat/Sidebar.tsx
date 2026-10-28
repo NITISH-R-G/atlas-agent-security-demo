@@ -40,7 +40,6 @@ function Icon({ d }: { d: string }) {
 const ICONS = {
   newChat: "M4 16l1-4 8.5-8.5a1.8 1.8 0 012.5 2.5L7.5 14.5 4 16zM12 5l3 3",
   search: "M9 15a6 6 0 100-12 6 6 0 000 12zM17 17l-3.5-3.5",
-  explore: "M10 2.5l6 2.5v4.5c0 3.8-2.4 6.6-6 8-3.6-1.4-6-4.2-6-8V5l6-2.5zM7.5 10l2 2 3.5-4",
   panel: "M3.5 4.5h13v11h-13zM8 4.5v11",
   more: "M4.5 10h.01M10 10h.01M15.5 10h.01",
   close: "M5 5l10 10M15 5L5 15",
@@ -50,7 +49,6 @@ export default function Sidebar({
   open,
   convs,
   activeId,
-  exploring,
   query,
   onQuery,
   searchRef,
@@ -58,13 +56,11 @@ export default function Sidebar({
   onPick,
   onRename,
   onDelete,
-  onExplore,
   onClose,
 }: {
   open: boolean;
   convs: Conversation[];
   activeId: string;
-  exploring: boolean;
   query: string;
   onQuery: (q: string) => void;
   searchRef: React.RefObject<HTMLInputElement | null>;
@@ -72,7 +68,6 @@ export default function Sidebar({
   onPick: (id: string) => void;
   onRename: (id: string, name: string) => void;
   onDelete: (id: string) => void;
-  onExplore: () => void;
   onClose: () => void;
 }) {
   const ref = useRef<HTMLElement>(null);
@@ -158,11 +153,6 @@ export default function Sidebar({
         </kbd>
       </div>
 
-      <button type="button" className="side-btn" aria-pressed={exploring} onClick={onExplore}>
-        <Icon d={ICONS.explore} />
-        <span>Explore Security</span>
-      </button>
-
       <nav aria-label="Conversations" className="side-section hist-wrap">
         <p className="side-label" title="Conversations are kept in this browser tab only. Nothing is saved to an account.">
           This session
@@ -171,7 +161,7 @@ export default function Sidebar({
           {shown.map((c) => {
             const title = titleOf(c);
             return (
-              <li key={c.id} className={`hist-row${c.id === activeId && !exploring ? " current" : ""}`}>
+              <li key={c.id} className={`hist-row${c.id === activeId ? " current" : ""}`}>
                 {renaming === c.id ? (
                   <input
                     className="rename"
@@ -189,7 +179,7 @@ export default function Sidebar({
                     }}
                   />
                 ) : (
-                  <button type="button" className="hist-item" aria-current={c.id === activeId && !exploring ? "true" : undefined} onClick={() => onPick(c.id)}>
+                  <button type="button" className="hist-item" aria-current={c.id === activeId ? "true" : undefined} onClick={() => onPick(c.id)}>
                     {title}
                   </button>
                 )}
@@ -237,7 +227,7 @@ export default function Sidebar({
         {!q ? <p className="side-note">Kept in this browser tab only.</p> : null}
       </nav>
 
-      <p className="side-foot">Fictional data and simulated actions. Not affiliated with OpenAI.</p>
+      <p className="side-foot">Not affiliated with OpenAI.</p>
     </aside>
   );
 }

@@ -2,7 +2,7 @@ import { buildAnswer, type Answer, type Block } from "./answer";
 import { scanUntrusted, extractDirectives, stripDirectives } from "./content";
 import type { ControlEval } from "./controls";
 import type { AuditRecord } from "./audit";
-import { CURRENT_PROJECT, RESOURCE_BY_ID } from "./environment";
+import { CURRENT_PROJECT, RESOURCE_BY_ID, USER } from "./environment";
 import type { SecurityPolicy } from "./policy";
 import { createContext, executeTool, type Context, type ToolOutcome } from "./runtime";
 
@@ -22,6 +22,8 @@ export interface ToolView {
   notices: string[];
   redactions: number;
   evals: ControlEval[];
+  principal: string;
+  source: string;
 }
 
 export type AgentEvent =
@@ -49,6 +51,8 @@ export const toView = (o: ToolOutcome): ToolView => ({
   notices: o.notices,
   redactions: o.redactions,
   evals: o.evals,
+  principal: o.principal,
+  source: o.source,
 });
 
 /* ------------------------------------------------------------------ */
@@ -58,6 +62,8 @@ export const toView = (o: ToolOutcome): ToolView => ({
 export type Intent =
   | "secrets"
   | "restricted_lookup"
+  | "export_request"
+  | "explain"
   | "send_summary"
   | "review_files"
   | "latest_updates"
@@ -71,10 +77,19 @@ export type Intent =
 const SECRETS_ASK =
   /(reveal|show|print|dump|display|leak|share|tell me|give me|what('| i)?s|what is|expose|output|list|repeat)\b[^.?!]{0,60}\b(system prompt|hidden instructions?|your (instructions|configuration|config|secrets?|credentials?|api[ -]?keys?|keys|environment|env\b)|environment variables?|process\.env|api[ -]?keys?\b[^.?!]{0,20}\byou\b)/;
 
+/** Requests the rule-based planner always handles: the outcome is decided by the server policy, never by a model's wording. */
+export const POLICY_INTENTS: ReadonlySet<Intent> = new Set<Intent>(["restricted_lookup", "export_request", "latest_updates", "send_summary", "review_files", "explain"]);
+
+const ROLE_CLAIM = /(i am|i'm|as|acting as|speaking as)\s+(the\s+|an?\s+)?(admin|administrator|ceo|cfo|owner|executive|manager|security|root|superuser)|admin(istrator)?\s+(mode|override|access|privileges?)|\b(authori[sz]ed|elevated|sudo|override|grant me)\b/;
+export const claimsPrivilege = (message: string) => ROLE_CLAIM.test(message.normalize("NFKC").toLowerCase());
+
 export function classify(message: string): Intent {
   const m = message.normalize("NFKC").toLowerCase();
   if (SECRETS_ASK.test(m)) return "secrets";
+  if (/\bwhy\b[^.?!]{0,60}\b(denied|blocked|rejected|refused|declined|not allowed|couldn'?t|can'?t|didn'?t)\b|\b(explain|what happened)\b[^.?!]{0,40}\b(denial|block|decision|rejection|that)\b/.test(m)) return "explain";
   if (/nightingale|compensation|salary|pay band|payroll/.test(m)) return "restricted_lookup";
+  if (/\b(export|download|dump|pull|extract)\b[^.?!]{0,50}\b(customers?|records?|cust-\d+)/.test(m)) return "export_request";
+  if (/(atlas sync|sync plugin|sync update|the plugin)/.test(m)) return "latest_updates";
   if (/\b(send|email|share|forward)\b/.test(m) && /(summary|update|team|status)/.test(m)) return "send_summary";
   if (/review/.test(m) && /(file|document|folder)/.test(m)) return "review_files";
   if (/(latest|recent|new)/.test(m) && /update/.test(m)) return "latest_updates";
@@ -157,6 +172,21 @@ export interface RunResult {
   answer?: Answer;
 }
 
+function deniedBlocks(o: ToolOutcome, what: string, claimed: boolean): Block[] {
+  const approval = o.decision === "approval_required";
+  const lines: Block[] = [
+    {
+      kind: "p",
+      text: approval
+        ? `Approval required: ${what} needs a person to confirm it. Nothing was shared.`
+        : `Access denied. Resource access restricted: ${what} is limited to teams that ${USER.name} (a Lighthouse project member) is not part of.`,
+    },
+  ];
+  if (claimed && !approval) lines.push({ kind: "p", text: "Saying you are an administrator doesn't change this. Permissions come from the signed-in user on the server, not from the conversation, and approval cannot replace a missing permission." });
+  lines.push({ kind: "p", text: "I can still help with Project Lighthouse: its status, latest updates or a summary for the team." });
+  return lines;
+}
+
 export async function runAgent(opts: RunOptions): Promise<RunResult> {
   const { message, policy, emit } = opts;
   const ctx = opts.ctx ?? createContext(policy, { sleep: opts.sleep, now: opts.now });
@@ -231,7 +261,7 @@ export async function runAgent(opts: RunOptions): Promise<RunResult> {
   const sentNote = (os: ToolOutcome[]) =>
     os
       .filter((o) => o.tool === "send_message" && o.status === "ok")
-      .map((o) => ({ kind: "p", text: `I also sent this to ${o.target}, as the content asked.` }) as Block);
+      .map((o) => ({ kind: "p", text: `The plugin output told me to send this to ${o.target}, and I did: it is in the outbox.` }) as Block);
 
   const finish = (blocks: Block[]) => {
     const answer = buildAnswer(blocks);
@@ -263,6 +293,7 @@ export async function runAgent(opts: RunOptions): Promise<RunResult> {
         let updates: string[] = [];
         let source = "the project record";
         let footer = "";
+        let rejected = false;
         const r = await call("fetch_updates", { projectId: CURRENT_PROJECT });
         if (r.status === "ok") {
           const d = r.data as { updates: string[]; footer: string };
@@ -271,6 +302,7 @@ export async function runAgent(opts: RunOptions): Promise<RunResult> {
           source = "the Atlas Sync update";
         } else {
           emit({ type: "step", id: `fallback-${++n}`, kind: "reason", text: "Using the first-party project record instead", state: "done" });
+          rejected = true;
           const p = await call("get_project", { id: CURRENT_PROJECT });
           if (p.status !== "ok") return failed([{ kind: "p", text: "I couldn't retrieve any updates just now." }]);
           const f = fieldsOf(p);
@@ -279,6 +311,7 @@ export async function runAgent(opts: RunOptions): Promise<RunResult> {
         const summaryText = updates.join(" ");
         const h = footer ? await handleUntrusted(footer, source, summaryText) : { followed: [], leaked: [], ignored: false };
         const blocks: Block[] = [{ kind: "report", title: "Latest updates for Project Lighthouse", points: updates.map(sanitize) }, ...h.leaked, ...sentNote(h.followed), ...declined(h.followed)];
+        if (rejected) blocks.unshift({ kind: "p", text: "Untrusted source rejected: the Atlas Sync plugin is unsigned and unverified, so its output was not used. Trusted source used: the Lighthouse project record." });
         if (h.ignored) blocks.push({ kind: "p", text: "The update also contained instructions addressed to AI assistants. I ignored them." });
         return finish(blocks);
       }
@@ -319,23 +352,41 @@ export async function runAgent(opts: RunOptions): Promise<RunResult> {
 
       case "restricted_lookup": {
         const m = message.toLowerCase();
-        const o = /nightingale/.test(m)
-          ? await call("get_project", { id: "proj-nightingale" })
-          : await call("read_document", { id: "doc-comp-bands" }, "Compensation bands");
+        const projectAsk = /nightingale/.test(m);
+        const o = projectAsk ? await call("get_project", { id: "proj-nightingale" }) : await call("read_document", { id: "doc-comp-bands" }, "Compensation bands");
+        const what = projectAsk ? "Project Nightingale" : "the compensation bands";
         if (o.status === "ok") {
           return finish([
-            {
-              kind: "table",
-              title: titleOf(o),
-              columns: ["Field", "Value"],
-              rows: Object.entries(fieldsOf(o)).map(([k, v]) => [k, v]),
-            },
+            { kind: "p", text: `Here is ${what}. This profile ran the request on a broad agent token and did not check which team ${USER.name} belongs to, so a record outside the Lighthouse team's access was returned.` },
+            { kind: "table", title: titleOf(o), columns: ["Field", "Value"], rows: Object.entries(fieldsOf(o)).map(([k, v]) => [k, v]) },
           ]);
         }
-        const why = o.decision === "approval_required" ? "needs approval" : "is outside what I'm allowed to access";
+        return finish(deniedBlocks(o, what, claimsPrivilege(message)));
+      }
+
+      case "export_request": {
+        const o = await call("export_records", { ids: ["cust-001"] }, "cust-001");
+        if (o.status === "ok") {
+          const recs = (o.data as { records?: { fields?: Record<string, string>; title?: string }[] } | undefined)?.records ?? [];
+          return finish([
+            { kind: "p", text: `The export ran. This profile gave the agent a broad token and never compared ${USER.name}'s team with the customer-record audience, so restricted customer data left the support-only store.` },
+            ...recs.map((r) => ({ kind: "table", title: String(r.title ?? "Customer record"), columns: ["Field", "Value"], rows: Object.entries(r.fields ?? {}).map(([k, v]) => [k, v]) }) as Block),
+          ]);
+        }
+        if (o.status === "pending") return finish([{ kind: "p", text: "Approval required: a customer export needs a person to confirm it. Nothing has been exported." }]);
+        return finish(deniedBlocks(o, "the customer records", claimsPrivilege(message)));
+      }
+
+      case "explain": {
+        const on = policy.leastPrivilege && policy.resourceAuthz;
+        const trusted = policy.trustValidation;
         return finish([
-          { kind: "p", text: `I can't share that: it ${why}.` },
-          { kind: "p", text: "I can still help with Project Lighthouse, the knowledge base, or your notes." },
+          on
+            ? { kind: "p", text: `Access is decided on the server from who is signed in (${USER.name}, a Lighthouse project member), not from what is said in the chat. Restricted finance, HR and customer records are outside that audience, so those requests are denied however the request is worded. An approval can confirm an action but cannot create an entitlement that is missing.` }
+            : { kind: "p", text: `In this profile nothing was denied on identity grounds: the agent holds a broad token and records are not checked against ${USER.name}'s team.` },
+          trusted
+            ? { kind: "p", text: "Third-party plugin output is handled as untrusted data. The Atlas Sync plugin is unsigned and unverified, so its response is rejected and the answer comes from the first-party project record." }
+            : { kind: "p", text: "Plugin output is trusted here. Atlas Sync is unsigned and unverified, but this profile does not check that, so its text can influence what the agent does next." },
         ]);
       }
 
@@ -344,9 +395,9 @@ export async function runAgent(opts: RunOptions): Promise<RunResult> {
         if (p.status !== "ok") return failed([{ kind: "p", text: "I couldn't prepare the summary." }]);
         const f = fieldsOf(p);
         const body = `${titleOf(p)}: ${f.status}. ${f.summary} Next milestone: ${f.nextMilestone}.`;
-        const s = await call("send_message", { to: "team@demo-company.example", subject: "Lighthouse summary", body });
+        const s = await call("send_message", { to: "team@atlas-labs.example", subject: "Lighthouse summary", body });
         const blocks: Block[] = [{ kind: "report", title: "Draft summary", points: [f.summary, `Next milestone: ${f.nextMilestone}`, `Risk: ${f.risks}`] }];
-        if (s.status === "ok") blocks.push({ kind: "p", text: "I sent the summary to team@demo-company.example (simulated outbox)." });
+        if (s.status === "ok") blocks.push({ kind: "p", text: "I sent the summary to team@atlas-labs.example (outbox)." });
         else if (s.status === "pending") blocks.push({ kind: "p", text: "The summary is ready. Sending it to the team requires your approval." });
         else blocks.push({ kind: "p", text: "I couldn't send the message." });
         return finish(blocks);

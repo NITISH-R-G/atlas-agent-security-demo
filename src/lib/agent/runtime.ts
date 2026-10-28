@@ -58,6 +58,10 @@ export interface ToolOutcome {
   latencyMs: number;
   /** Per-control evaluations that actually ran for this call, in order. */
   evals: ControlEval[];
+  /** Who the action ran as: the configured user and the privilege level this profile gives the agent. */
+  principal: string;
+  /** Where the tool comes from and how far it is trusted (server configuration, never the model's claim). */
+  source: string;
 }
 
 export interface Identity {
@@ -110,11 +114,11 @@ export function createContext(policy: SecurityPolicy, opts: Partial<Pick<Context
   return {
     policy,
     // A fictional service account. Excessive in the vulnerable profile, task-sized in the protected one.
-    identity: { id: "atlas-agent@demo", scopes: policy.leastPrivilege ? [...NARROW_SCOPES] : ["*"] },
+    identity: { id: "atlas-agent@atlas-labs.example", scopes: policy.leastPrivilege ? [...NARROW_SCOPES] : ["*"] },
     // A simulated credential: long-lived and broad, or scoped to the task and short-lived.
     token: policy.scopedCredentials
-      ? { id: "demo-token-scoped", scopes: [...NARROW_SCOPES], expiresAt: now() + TOKEN_TTL_MS, synthetic: true }
-      : { id: "demo-token-wide", scopes: ["*"], expiresAt: Number.POSITIVE_INFINITY, synthetic: true },
+      ? { id: "svc-token-scoped", scopes: [...NARROW_SCOPES], expiresAt: now() + TOKEN_TTL_MS, synthetic: true }
+      : { id: "svc-token-wide", scopes: ["*"], expiresAt: Number.POSITIVE_INFINITY, synthetic: true },
     state: opts.state ?? freshState(),
     now,
     sleep: opts.sleep ?? ((ms) => new Promise((r) => setTimeout(r, ms))),
@@ -264,7 +268,7 @@ export const TOOLS: Record<string, ToolDef> = {
     run: (a, ctx) => {
       const m = { id: `msg-${ctx.state.outbox.length + 1}`, to: String(a.to), subject: String(a.subject), body: String(a.body) };
       ctx.state.outbox.push(m);
-      return { delivered: "simulated-outbox", id: m.id, to: m.to };
+      return { delivered: "outbox", id: m.id, to: m.to };
     },
   },
   export_records: {
@@ -387,12 +391,27 @@ function runChecks(def: ToolDef, call: ToolCall, ctx: Context, args: Record<stri
   return failure;
 }
 
+/** The configured principal and privilege level for this run. It is derived from the server-side policy, never from conversation text. */
+export function principalLabel(ctx: Context): string {
+  const scopes = ctx.identity.scopes;
+  const level = Array.isArray(scopes) && scopes.includes("*") ? "unrestricted agent token (all scopes)" : "project member (scoped to the Lighthouse team)";
+  return `${USER.name} · ${level}`;
+}
+
+/** Provenance of a tool, from server configuration. */
+export function sourceLabel(tool: string): string {
+  const def = Object.hasOwn(TOOLS, tool) ? TOOLS[tool] : undefined;
+  if (!def) return "unknown tool";
+  const p = def.provenance;
+  return p.signed && p.pinned && p.publisherVerified ? "first-party tool, verified" : "third-party plugin, unsigned and unverified";
+}
+
 export async function executeTool(ctx: Context, call: ToolCall): Promise<ToolOutcome> {
   const evals: ControlEval[] = [];
   const base = { callId: call.id, tool: call.tool, redactions: 0, notices: [] as string[], untrustedOutput: false, latencyMs: 0, evals };
-  const finish = (o: Omit<ToolOutcome, keyof typeof base | "notices"> & { notices?: string[] } & Partial<typeof base>): ToolOutcome => {
+  const finish = (o: Omit<ToolOutcome, keyof typeof base | "notices" | "principal" | "source"> & { notices?: string[] } & Partial<typeof base>): ToolOutcome => {
     evals.push(ctx.policy.audit ? evalOf("audit", "allowed", "recorded", "Decision recorded in the in-memory server audit log.", "documented") : off("audit"));
-    const out: ToolOutcome = { ...base, ...o, notices: o.notices ?? [] };
+    const out: ToolOutcome = { ...base, ...o, notices: o.notices ?? [], principal: principalLabel(ctx), source: sourceLabel(call.tool) };
     if (ctx.policy.audit) {
       ctx.audit.push({ at: ctx.now(), tool: out.tool, target: out.target, decision: out.decision, layer: out.layer });
       recordAudit({ at: ctx.now(), callId: out.callId, tool: out.tool, target: out.target, decision: out.decision, layer: out.layer, source: ctx.source });

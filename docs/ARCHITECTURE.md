@@ -46,8 +46,7 @@ flowchart LR
 | Activity (collapsed) and its timeline | the same events; details show tool, server decision, reason and outcome |
 | Approval card | a parked approval; after the decision, the confirmed result from the server |
 | Evidence drawer | per-control evaluations and linked audit records |
-| Explore Security: scenarios A to D | real server runs in demo mode |
-| Explore Security: architecture path | derived from the selected run's recorded events; unvisited nodes stay gray |
+| Access and plugin requests | real server runs, always through the rule-based planner |
 | Guided tour | highlights elements that exist right now; steps without a target are skipped |
 
 ## Serverless behaviour

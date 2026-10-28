@@ -91,7 +91,7 @@ describe("each control reports its real evaluation at its enforcement point", ()
 
   it("8 approvalForSensitive: pending (blocked until approved), approved, and denied", async () => {
     const ctx = mk(onlyControls("approvalForSensitive"));
-    const args = { to: "team@demo-company.example", subject: "s", body: "b" };
+    const args = { to: "team@atlas-labs.example", subject: "s", body: "b" };
     const pending = await call(ctx, "send_message", args, "call-aaaaaaaaaaaaaaaaaaaaaaaa-1");
     expect(ev(pending, "approvalForSensitive")).toMatchObject({ decision: "blocked", code: "approval_pending", effect: "prevented" });
     expect(ctx.state.outbox).toHaveLength(0);
@@ -119,7 +119,7 @@ describe("each control reports its real evaluation at its enforcement point", ()
   });
 
   it("11 failClosed: a synthetic authorization outage denies when on and fails open (as a defined weakness) when off", async () => {
-    const args = { to: "team@demo-company.example", subject: "s", body: "b" };
+    const args = { to: "team@atlas-labs.example", subject: "s", body: "b" };
     const on = mk(policyFor(true), { extraChecks: [syntheticAuthFault] });
     const closed = await call(on, "send_message", args);
     expect(ev(closed, "failClosed")).toMatchObject({ decision: "blocked", code: "check_error", effect: "prevented" });
@@ -148,7 +148,7 @@ describe("evidence ordering and safety", () => {
 
   it("never marks detection or documentation as prevention", async () => {
     for (const on of [false, true]) {
-      for (const [tool, args] of [["get_project", { id: "proj-nightingale" }], ["read_document", { id: "doc-comp-bands" }], ["send_message", { to: "a@demo-company.example", subject: "s", body: "b" }]] as const) {
+      for (const [tool, args] of [["get_project", { id: "proj-nightingale" }], ["read_document", { id: "doc-comp-bands" }], ["send_message", { to: "a@atlas-labs.example", subject: "s", body: "b" }]] as const) {
         const o = await call(mk(policyFor(on)), tool, args);
         for (const e of o.evals) {
           if (e.effect === "prevented") expect(e.decision).toBe("blocked");

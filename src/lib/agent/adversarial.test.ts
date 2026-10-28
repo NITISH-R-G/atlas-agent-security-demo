@@ -27,7 +27,7 @@ const VALID: Record<string, Record<string, unknown>> = {
   list_documents: { projectId: "proj-lighthouse" },
   read_document: { id: "doc-lighthouse-brief" },
   fetch_updates: { projectId: "proj-lighthouse" },
-  send_message: { to: "team@demo-company.example", subject: "s", body: "b" },
+  send_message: { to: "team@atlas-labs.example", subject: "s", body: "b" },
   export_records: { ids: ["cust-001"] },
 };
 

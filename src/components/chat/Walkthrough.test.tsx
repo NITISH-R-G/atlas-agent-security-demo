@@ -32,6 +32,7 @@ beforeAll(() => {
   for (const k of ["NVIDIA_API_KEY", "NEMOTRON_MODEL", "NVIDIA_BASE_URL"]) delete process.env[k];
 });
 beforeEach(() => {
+  window.localStorage.clear();
   clearPending();
   bodies.length = 0;
   installFetch();
@@ -40,12 +41,18 @@ afterEach(() => vi.unstubAllGlobals());
 
 const lastAssistant = () => [...document.querySelectorAll<HTMLElement>(".msg.assistant")].at(-1)!;
 const settled = () => waitFor(() => expect(lastAssistant().getAttribute("data-status")).not.toBe("working"), { timeout: 4000 });
-const openDemo = async (user: ReturnType<typeof userEvent.setup>) => {
-  await user.click(within(screen.getByRole("complementary", { name: "Sidebar" })).getByRole("button", { name: "Explore Security" }));
-  return screen.getByRole("region", { name: "Explore Security" });
+const PROMPTS: Record<string, { security: boolean; text: string }> = {
+  A: { security: false, text: "Find the latest project updates." },
+  B: { security: true, text: "Find the latest project updates." },
+  C: { security: true, text: "Read the project update and send a summary to the team." },
 };
+/** Types the request in the normal composer, with the Security switch set the way the request needs. */
 const runStage = async (user: ReturnType<typeof userEvent.setup>, id: string) => {
-  await user.click(screen.getByRole("button", { name: new RegExp(`scenario ${id},`) }));
+  const p = PROMPTS[id];
+  const sw = screen.getByRole("switch", { name: "Security" });
+  if ((sw.getAttribute("aria-checked") === "true") !== p.security) await user.click(sw);
+  await user.type(screen.getByLabelText("Message"), p.text);
+  await user.keyboard("{Enter}");
   await settled();
   // The evidence drawer opens on request, from the Activity of the reply that was just produced.
   const open = screen.queryAllByRole("button", { name: "Open full evidence" }).at(-1);
@@ -59,7 +66,6 @@ describe("walkthrough panel", () => {
     const user = userEvent.setup();
     render(<ChatApp />);
     expect(screen.queryByRole("complementary", { name: "Security walkthrough" })).toBeNull();
-    await openDemo(user);
     await runStage(user, "B");
     expect(wt().textContent).toMatch(/Security was ON/);
     await user.click(within(wt()).getByRole("button", { name: "Close" }));
@@ -69,12 +75,11 @@ describe("walkthrough panel", () => {
   it("Security ON: lists the real steps, selects the blocked step first, and shows each control's decision, code, evidence and effect", async () => {
     const user = userEvent.setup();
     render(<ChatApp />);
-    await openDemo(user);
     await runStage(user, "B");
     const panel = wt();
     expect(panel.textContent).toMatch(/Security was ON/);
     expect(stepButton(/You asked/)).toBeTruthy();
-    expect(stepButton(/Scripted scenario/)).toBeTruthy();
+    expect(stepButton(/Rule-based reply/)).toBeTruthy();
     const blocked = stepButton(/Fetch updates.*proj-lighthouse/);
     expect(blocked.getAttribute("aria-current")).toBe("step");
     const detail = within(panel).getByRole("region", { name: "Step details" });
@@ -95,7 +100,6 @@ describe("walkthrough panel", () => {
   it("'Why was this blocked?' appears only for blocked or pending steps and shows the reason and the deciding control", async () => {
     const user = userEvent.setup();
     render(<ChatApp />);
-    await openDemo(user);
     await runStage(user, "B");
     expect(within(wt()).getByRole("button", { name: "Why was this blocked?" })).toBeTruthy();
     await user.click(within(wt()).getByRole("button", { name: "Why was this blocked?" }));
@@ -108,7 +112,6 @@ describe("walkthrough panel", () => {
   it("Security OFF: controls are shown as not enforced or documented, never as prevented, and there is no audit step", async () => {
     const user = userEvent.setup();
     render(<ChatApp />);
-    await openDemo(user);
     await runStage(user, "A");
     const steps = within(wt()).getAllByRole("button").map((b) => b.textContent ?? "");
     expect(steps.some((s) => /Read document.*doc-nightingale-budget/.test(s))).toBe(true);
@@ -127,22 +130,21 @@ describe("walkthrough panel", () => {
   it("approval stage: pending, then approved or denied, with the walkthrough, chips and audit in agreement", async () => {
     const user = userEvent.setup();
     render(<ChatApp />);
-    await openDemo(user);
     await runStage(user, "C");
-    const pendingStep = stepButton(/Send message.*team@demo-company\.example/);
+    const pendingStep = stepButton(/Send message.*team@atlas-labs.example/);
     expect(pendingStep.textContent).toMatch(/Waiting/);
     await user.click(pendingStep);
     expect(within(wt()).getByRole("region", { name: "Step details" }).textContent).toContain("approval_pending");
     expect(lastAssistant().querySelector(".approval")).toBeTruthy();
 
     await user.click(within(lastAssistant()).getByRole("button", { name: "Approve" }));
-    await waitFor(() => expect(lastAssistant().textContent).toMatch(/Approved · Simulated send completed/));
+    await waitFor(() => expect(lastAssistant().textContent).toMatch(/Approved · Message queued in outbox/));
     expect(stepButton(/Your approval decision/).textContent).toMatch(/Allowed/);
-    expect(stepButton(/Send message.*team@demo-company\.example/).textContent).toMatch(/Allowed/);
+    expect(stepButton(/Send message.*team@atlas-labs.example/).textContent).toMatch(/Allowed/);
     await user.click(stepButton(/Audit events/));
     const audit = wt().querySelector(".wt-audit")!.textContent!;
-    expect(audit).toMatch(/send_message → team@demo-company\.example: approval_required/);
-    expect(audit).toMatch(/send_message → team@demo-company\.example: granted/);
+    expect(audit).toMatch(/send_message → team@atlas-labs.example: approval_required/);
+    expect(audit).toMatch(/send_message → team@atlas-labs.example: granted/);
 
     await runStage(user, "C");
     await user.click(within(lastAssistant()).getByRole("button", { name: "Deny" }));
@@ -152,23 +154,9 @@ describe("walkthrough panel", () => {
     expect(wt().querySelector(".wt-audit")!.textContent).toMatch(/denied \(approvalForSensitive\)/);
   });
 
-  it("fail-closed stage: the simulated outage denies the action under Security ON and the walkthrough says why", async () => {
+  it("the same request is repeatable: the same setting gives identical tool outcomes", async () => {
     const user = userEvent.setup();
     render(<ChatApp />);
-    await openDemo(user);
-    await runStage(user, "D");
-    expect(lastAssistant().querySelector(".approval")).toBeNull(); // never reached the approval gate
-    const d = within(wt()).getByRole("region", { name: "Step details" });
-    expect(d.textContent).toContain("Fail closed");
-    expect(d.textContent).toContain("check_error");
-    expect(d.textContent).toContain("Prevented");
-    expect(bodies.at(-1)).toMatchObject({ fault: "authz", demo: true, security: true });
-  });
-
-  it("the demo is repeatable: running A then B twice gives identical tool outcomes; Restart clears the chat", async () => {
-    const user = userEvent.setup();
-    render(<ChatApp />);
-    await openDemo(user);
     const outcome = () => [...lastAssistant().querySelectorAll(".tchip")].map((c) => c.textContent).join("|");
     await runStage(user, "A");
     const a1 = outcome();
@@ -180,8 +168,6 @@ describe("walkthrough panel", () => {
     expect(a1).not.toMatch(/Blocked|Denied/);
     expect(b1).toMatch(/blocked/);
     expect(screen.getByRole("switch", { name: "Security" }).getAttribute("aria-checked")).toBe("true");
-    await user.click(screen.getByRole("button", { name: /Back to chat/ }));
-    expect(document.querySelectorAll(".msg").length).toBe(0);
   });
 });
 
@@ -196,7 +182,7 @@ describe("walkthrough model is built only from recorded events", () => {
     s = chatReducer(s, {
       type: "event",
       id: "a",
-      event: { type: "tool", view: { callId: "c1", tool: "x", label: "X", target: "t", decision: "denied", layer: "leastPrivilege", reason: "r", status: "blocked", notices: [], redactions: 0, evals: [{ control: "leastPrivilege", decision: "blocked", code: "scope_missing", evidence: "e", effect: "prevented" }] } },
+      event: { type: "tool", view: { callId: "c1", tool: "x", label: "X", target: "t", decision: "denied", layer: "leastPrivilege", reason: "r", status: "blocked", notices: [], redactions: 0, principal: "p", source: "s", evals: [{ control: "leastPrivilege", decision: "blocked", code: "scope_missing", evidence: "e", effect: "prevented" }] } },
     });
     const m = s.messages[1] as AssistantMessage;
     const step = buildWalkthrough(m).find((x) => x.kind === "tool")!;
@@ -210,14 +196,12 @@ describe("walkthrough model is built only from recorded events", () => {
 });
 
 describe("replies say where they came from", () => {
-  it("scripted demo stages are tagged as scripted; built-in replies as built-in; model replies name the model", async () => {
+  it("rule-based replies are tagged as such; built-in replies as built-in; model replies name the model", async () => {
     const user = userEvent.setup();
     render(<ChatApp />);
-    await openDemo(user);
     await runStage(user, "A");
     expect(lastAssistant().querySelector(".src-tag")!.getAttribute("data-engine")).toBe("scripted");
-    expect(lastAssistant().querySelector(".src-tag")!.textContent).toMatch(/Scripted scenario · no language model/);
-    await user.click(screen.getByRole("button", { name: /Back to chat/ }));
+    expect(lastAssistant().querySelector(".src-tag")!.textContent).toMatch(/Rule-based reply · no language model/);
     await user.type(screen.getByLabelText("Message"), "Tell me a joke");
     await user.keyboard("{Enter}");
     await settled();

@@ -17,7 +17,7 @@ The interface follows the interaction patterns of current chat products. It does
 | Area | Pattern observed | Atlas decision |
 |---|---|---|
 | Layout | Sidebar about 260 px, content column about 768 px | `--side-w: 260px`, `--col: 768px` |
-| Sidebar | Compact icon rows, collapsible, drawer on phones | New chat, Search chats, Explore Security, then history; collapses on desktop, becomes a drawer with a scrim under 860 px |
+| Sidebar | Compact icon rows, collapsible, drawer on phones | New chat, Search chats, then history; collapses on desktop, becomes a drawer with a scrim under 860 px |
 | History | Per-chat options menu | Rename and Delete, real and session-local. Labelled "This session" and "Kept in this browser tab only"; nothing is saved to an account |
 | Search | Ctrl or Cmd + K | Real filter over titles, your messages and Atlas replies; Escape clears; a clear no-results line |
 | Empty screen | Heading and composer centered, suggestions below | Same; the composer is the same element before and after the first message, so typing and focus are never lost |

@@ -2,7 +2,7 @@ import { peekPending } from "@/lib/agent/approvals";
 import { sealCall } from "@/lib/agent/seal";
 import { setAuditStdout } from "@/lib/agent/audit";
 import { runModel } from "@/lib/agent/orchestrator";
-import { classify, runAgent, type AgentEvent } from "@/lib/agent/planner";
+import { classify, POLICY_INTENTS, runAgent, type AgentEvent } from "@/lib/agent/planner";
 import { policyFor } from "@/lib/agent/policy";
 import { readModelConfig } from "@/lib/agent/provider";
 import { parseChatRequest } from "@/lib/agent/request";
@@ -46,7 +46,7 @@ export async function POST(req: Request) {
   const ip = clientIp(req);
   if (ip && !allowChat(`ip:${ip}`, Date.now(), IP_LIMIT)) return limited("Too many requests from this network. Wait a few minutes and try again.");
   if (!allowChat(sid)) return limited("Too many requests from this session. Wait a few minutes and try again.");
-  if (!allowGlobal()) return limited("Atlas is receiving a lot of traffic. Wait a few minutes, or try a scripted scenario.", 503, "busy");
+  if (!allowGlobal()) return limited("Atlas is receiving a lot of traffic. Wait a few minutes and try again.", 503, "busy");
   const release = acquireSlot();
   if (!release) return limited("Atlas is busy right now. Try again in a moment.", 503, "busy");
 
@@ -57,8 +57,11 @@ export async function POST(req: Request) {
   if (fault === "authz") ctx.extraChecks = [syntheticAuthFault];
 
   const config = readModelConfig(process.env);
-  const secretsAsk = classify(message) === "secrets";
-  const useModel = !demo && config.ok && !secretsAsk;
+  const intent = classify(message);
+  const secretsAsk = intent === "secrets";
+  // Access and plugin-trust requests are always decided by the server's rule-based planner, so the enforcement result never depends on a model's wording.
+  const policyRoute = POLICY_INTENTS.has(intent);
+  const useModel = !demo && config.ok && !secretsAsk && !policyRoute;
   ctx.sid = sid;
   ctx.source = demo ? "scripted" : useModel ? "model" : "builtin";
   const withTicket = (e: Extract<AgentEvent, { type: "approval" }>): AgentEvent => {
@@ -84,9 +87,9 @@ export async function POST(req: Request) {
         } else {
           emit({
             type: "model",
-            engine: demo ? "scripted" : "deterministic",
-            label: demo ? "Scripted scenario (deterministic)" : secretsAsk ? "Built-in assistant (credential and configuration requests never reach the model)" : "Built-in assistant (no language model configured)",
-            note: demo ? "Reproducible synthetic scenario; no language model is used." : secretsAsk ? "This request was answered without calling any model." : config.ok ? undefined : config.message,
+            engine: demo || policyRoute ? "scripted" : "deterministic",
+            label: demo || policyRoute ? "Rule-based reply (no language model)" : secretsAsk ? "Built-in assistant (credential and configuration requests never reach the model)" : "Built-in assistant (no language model configured)",
+            note: demo || policyRoute ? "This answer is produced by fixed rules applied to the server's access policy; no language model was called." : secretsAsk ? "This request was answered without calling any model." : config.ok ? undefined : config.message,
           });
           await runAgent({ message, policy, emit, signal: req.signal, ctx });
         }
