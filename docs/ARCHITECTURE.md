@@ -28,10 +28,10 @@ flowchart LR
 
 ## Request path
 
-1. **Browser** (`src/components/chat/ChatApp.tsx`) sends `{message, security, history}` to `POST /api/chat`. The `security` flag is a demo setting, not authentication.
+1. **Browser** (`src/components/chat/ChatApp.tsx`) sends `{message, security, history}` to `POST /api/chat`. The `security` flag is a scenario setting, not authentication.
 2. **Route** (`src/app/api/chat/route.ts`): validates the body (`src/lib/agent/request.ts`), caps its size, mints or reads the anonymous `atlas_sid` cookie (`session.ts`), applies per-session, per-IP and global limits and a concurrent-stream cap, and derives the policy from the boolean only.
 3. **Who proposes tool calls** is labelled on every reply:
-   - *Scripted demo scenario*: deterministic planner (`planner.ts`), no model, used by stages A to D.
+   - *Scripted scenario*: deterministic planner (`planner.ts`), no model, used by stages A to D.
    - *Live model*: Groq through the Vercel AI SDK (`orchestrator.ts`, `provider.ts`). The model only proposes tool calls. No provider fallback exists; failures surface as honest errors.
    - *Built-in assistant*: deterministic answers, used for credential or configuration questions so a model never sees them.
 4. **Policy engine** (`executeTool` in `runtime.ts`, profiles in `policy.ts`): every call, from any planner, passes one function: strict argument and resource-kind check, trust and provenance, tool allowlist, identity scope, credential scope and expiry, resource audience, approval gate, execution, output filtering, audit. Each control records a `ControlEval` (decision, reason code, evidence, effect).

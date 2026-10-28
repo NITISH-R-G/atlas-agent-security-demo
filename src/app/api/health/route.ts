@@ -20,7 +20,7 @@ export async function GET() {
       uptimeSeconds: Math.round((Date.now() - startedAt) / 1000),
       model,
       state: { approvals: "signed session-bound tickets; single use enforced per instance (not shared across instances)", audit: "in memory, bounded, not durable", sessions: "anonymous cookie, not authentication" },
-      note: "Synthetic data only. Scripted demo stages never call a model.",
+      note: "Synthetic data only. Scripted scenarios never call a model.",
     },
     { headers: { "Cache-Control": "no-store" } },
   );

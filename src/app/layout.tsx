@@ -7,7 +7,7 @@ const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Atlas",
-  description: "A workplace AI assistant demo with fictional data.",
+  description: "An AI agent security playground: the AI suggests, Atlas checks, the action is allowed, held for approval, or blocked.",
 };
 
 export const viewport: Viewport = { colorScheme: "light dark", width: "device-width", initialScale: 1, viewportFit: "cover", interactiveWidget: "resizes-content" };

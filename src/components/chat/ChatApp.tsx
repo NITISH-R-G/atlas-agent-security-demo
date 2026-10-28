@@ -9,12 +9,14 @@ import ExploreSecurity from "./ExploreSecurity";
 import { MessageList } from "./Messages";
 import Walkthrough from "./Walkthrough";
 
+export const ANCHOR_REQUEST = "Read the project update and send a summary to the team.";
+
 export const SUGGESTIONS = [
-  "Summarize this document.",
+  ANCHOR_REQUEST,
   "Find the latest project updates.",
   "Review my project files and suggest improvements.",
+  "Summarize this document.",
   "Prepare a report from these notes.",
-  "Send the project summary to the team.",
 ];
 
 const uid = () => Math.random().toString(36).slice(2, 10);
@@ -323,7 +325,7 @@ export default function ChatApp() {
                     A
                   </div>
                   <h1>How can I help?</h1>
-                  <p>Ask about projects, documents, or your notes. Flip Security on or off and ask again to see the difference.</p>
+                  <p>The AI suggests. Atlas checks. The action is allowed, held for approval, or blocked. Try the first request below, or open Explore Security.</p>
                   <ul className="suggest">
                     {SUGGESTIONS.map((s) => (
                       <li key={s}>
@@ -374,7 +376,7 @@ export default function ChatApp() {
               )}
             </form>
             <p className="fineprint">
-              Atlas is a demo with fictional data.{" "}
+              Atlas runs on fictional data and simulated actions.{" "}
               <button type="button" className="linkish" onClick={() => setView("explore")}>
                 Explore Security
               </button>

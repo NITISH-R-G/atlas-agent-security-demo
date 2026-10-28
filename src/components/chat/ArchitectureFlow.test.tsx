@@ -5,8 +5,8 @@ import { chatReducer, initialChat, type AssistantMessage } from "./chat-state";
 import ArchitectureFlow from "./ArchitectureFlow";
 
 function messageWith(security: boolean, tools: Array<{ status: "ok" | "blocked" | "pending"; decision: string }>): AssistantMessage {
-  let st = chatReducer(initialChat, { type: "send", userId: "u", assistantId: "a", text: "Send the project summary to the team.", security, now: 0 });
-  st = chatReducer(st, { type: "event", id: "a", event: { type: "model", engine: "scripted", label: "Scripted demo scenario" } as never });
+  let st = chatReducer(initialChat, { type: "send", userId: "u", assistantId: "a", text: "Read the project update and send a summary to the team.", security, now: 0 });
+  st = chatReducer(st, { type: "event", id: "a", event: { type: "model", engine: "scripted", label: "Scripted scenario" } as never });
   tools.forEach((t, i) => {
     st = chatReducer(st, {
       type: "event",

@@ -40,7 +40,7 @@ function deriveNodes(m: AssistantMessage | undefined): FlowNode[] {
   const policy: NodeState = tools.length === 0 ? "idle" : !security ? "off" : stopped.length ? "blocked" : pending.length ? "pending" : "ok";
   return [
     { id: "user", title: "You", sub: asked ? "Sent a request" : "Waiting", state: asked ? "done" : "idle", where: "browser", detail: asked ? m!.request : "Ask something, or run a guided stage." },
-    { id: "ui", title: "Atlas UI", sub: asked ? `Security ${security ? "ON" : "OFF"}` : "Chat interface", state: asked ? "done" : "idle", where: "browser", detail: "The browser sends the request. Its Security switch is a demo setting and gives it no privileges." },
+    { id: "ui", title: "Atlas UI", sub: asked ? `Security ${security ? "ON" : "OFF"}` : "Chat interface", state: asked ? "done" : "idle", where: "browser", detail: "The browser sends the request. Its Security switch is a scenario setting and gives it no privileges." },
     {
       id: "model",
       title: model && model.kind === "model" ? (model.engine === "llm" ? "Live model" : model.engine === "scripted" ? "Scripted planner" : "Built-in assistant") : "Model",

@@ -58,7 +58,7 @@ describe("approvals in the UI", () => {
     const user = userEvent.setup();
     render(<ChatApp />);
     await user.click(sw());
-    await send(user, "Send the project summary to the team.");
+    await send(user, "Read the project update and send a summary to the team.");
     await settled();
     const btn = within(lastAssistant()).getByRole("button", { name: "Approve" });
     await Promise.all([user.click(btn), user.click(btn), user.click(btn)]).catch(() => undefined);
@@ -83,9 +83,9 @@ describe("approvals in the UI", () => {
     const user = userEvent.setup();
     render(<ChatApp />);
     await user.click(sw());
-    await send(user, "Send the project summary to the team.");
+    await send(user, "Read the project update and send a summary to the team.");
     await settled();
-    await send(user, "Send the project summary to the team.");
+    await send(user, "Read the project update and send a summary to the team.");
     await settled();
     const [first, second] = [...document.querySelectorAll<HTMLElement>(".msg.assistant")];
     await user.click(within(second).getByRole("button", { name: "Deny" }));
@@ -101,7 +101,7 @@ describe("approvals in the UI", () => {
     const user = userEvent.setup();
     const first = render(<ChatApp />);
     await user.click(sw());
-    await send(user, "Send the project summary to the team.");
+    await send(user, "Read the project update and send a summary to the team.");
     await settled();
     first.unmount();
     render(<ChatApp />); // a reload: the UI forgets the card, the server keeps the parked action unexecuted
@@ -218,7 +218,7 @@ describe("accessibility basics", () => {
     expect(screen.getByRole("main", { name: "Conversation" })).toBeTruthy();
     await user.click(sw());
     expect(document.querySelector(".mode")!.getAttribute("aria-live")).toBe("polite");
-    await send(user, "Send the project summary to the team.");
+    await send(user, "Read the project update and send a summary to the team.");
     await settled();
     expect(within(lastAssistant()).getByRole("group", { name: "Approval required" })).toBeTruthy();
     expect(within(lastAssistant()).getByRole("list", { name: "Tool activity" })).toBeTruthy();

@@ -204,7 +204,7 @@ export function AssistantBubble({ m, onDecide, onEvidence }: { m: AssistantMessa
         {src && src.kind === "model" ? (
           <p className={`src-tag ${src.engine}`} data-engine={src.engine}>
             <span className="src-dot" aria-hidden="true" />
-            {src.engine === "scripted" ? "Scripted demo scenario · no language model" : src.engine === "llm" ? `Model reply · ${src.label}` : "Built-in assistant · no language model"}
+            {src.engine === "scripted" ? "Scripted scenario · no language model" : src.engine === "llm" ? `Model reply · ${src.label}` : "Built-in assistant · no language model"}
           </p>
         ) : null}
       </div>

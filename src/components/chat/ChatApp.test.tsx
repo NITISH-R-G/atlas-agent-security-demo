@@ -146,7 +146,7 @@ describe("same request, two modes (real server handlers)", () => {
     const user = userEvent.setup();
     render(<ChatApp />);
     await user.click(sw());
-    await user.click(screen.getByRole("button", { name: "Send the project summary to the team." }));
+    await user.click(screen.getByRole("button", { name: "Read the project update and send a summary to the team." }));
     await settled();
     const card = within(lastAssistant()).getByRole("group", { name: "Approval required" });
     expect(lastAssistant().textContent).not.toMatch(/Approved · Simulated send completed/);
@@ -160,7 +160,7 @@ describe("same request, two modes (real server handlers)", () => {
     const user = userEvent.setup();
     render(<ChatApp />);
     await user.click(sw());
-    await user.click(screen.getByRole("button", { name: "Send the project summary to the team." }));
+    await user.click(screen.getByRole("button", { name: "Read the project update and send a summary to the team." }));
     await settled();
     await user.click(within(lastAssistant()).getByRole("button", { name: "Deny" }));
     await waitFor(() => expect(lastAssistant().textContent).toMatch(/You declined. Nothing was sent./));
@@ -171,7 +171,7 @@ describe("same request, two modes (real server handlers)", () => {
   it("Security OFF sends without a prompt, and says so", async () => {
     const user = userEvent.setup();
     render(<ChatApp />);
-    await user.click(screen.getByRole("button", { name: "Send the project summary to the team." }));
+    await user.click(screen.getByRole("button", { name: "Read the project update and send a summary to the team." }));
     await settled();
     expect(within(lastAssistant()).queryByRole("group", { name: "Approval required" })).toBeNull();
     expect(lastAssistant().textContent).toContain("I sent the summary");

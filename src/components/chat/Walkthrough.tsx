@@ -38,7 +38,7 @@ export default function Walkthrough({ message, onClose }: { message: AssistantMe
       ) : (
         <>
           <p className="wt-sub">
-            Follows the real execution of the selected reply. Security was <strong>{message.security ? "ON" : "OFF"}</strong> for it. A client-side switch is a demo setting, not a trust boundary.
+            Follows the real execution of the selected reply. Security was <strong>{message.security ? "ON" : "OFF"}</strong> for it. A client-side switch is a scenario setting, not a trust boundary.
           </p>
           <ol className="wt-steps">
             {steps.map((s) => (

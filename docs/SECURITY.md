@@ -20,7 +20,7 @@ Trust boundaries: (1) browser -> server (untrusted input, including the Security
 
 There are no users. The server derives one principal per request: the fictional agent identity `atlas-agent@demo` acting for
 the fictional user Sam Rivera (team `lighthouse`). Nothing in a request body can change it: unknown fields (`role`, `userId`,
-`policy`, `controls`) are ignored; the only mode input is the boolean `security`, a **demo setting, not authentication**.
+`policy`, `controls`) are ignored; the only mode input is the boolean `security`, a **scenario setting, not authentication**.
 An anonymous session cookie (`atlas_sid`, HttpOnly, SameSite=Strict, Secure over HTTPS including behind a TLS-terminating proxy, unguessable) binds approvals and rate limits to a browser.
 
 ## 3. Tools and side effects
@@ -80,8 +80,8 @@ and the linked audit record. Detection is never shown as prevention.
 
 ## 8. Scripted vs live
 
-Scripted demo stages (`demo: true`) run deterministic code with no model; their audit records carry `source: scripted` and the
-UI tags the reply "Scripted demo scenario". Live replies are tagged with the provider and model; built-in replies are tagged as
+Scripted scenarios (`demo: true` in the request) run deterministic code with no model; their audit records carry `source: scripted` and the
+UI tags the reply "Scripted scenario". Live replies are tagged with the provider and model; built-in replies are tagged as
 built-in. A real model may ignore an injected instruction under Security OFF; the scripted agent always follows it, which is what
 makes the OFF/ON comparison repeatable.
 

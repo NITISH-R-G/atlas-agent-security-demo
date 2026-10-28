@@ -27,7 +27,8 @@ interface Hit {
 }
 
 function inspectLine(line: string): Hit | undefined {
-  const clean = line.normalize("NFKC").replace(ZERO_WIDTH, "");
+  // Runs of spaces and tabs collapse to one space so padding cannot hide a phrase from the heuristic.
+  const clean = line.normalize("NFKC").replace(ZERO_WIDTH, "").replace(/[ \t\u00a0]+/g, " ");
   const lower = clean.toLowerCase();
   let at = -1;
   for (const p of PATTERNS) {

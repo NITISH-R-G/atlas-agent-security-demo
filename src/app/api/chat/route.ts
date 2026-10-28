@@ -46,9 +46,9 @@ export async function POST(req: Request) {
   const ip = clientIp(req);
   if (ip && !allowChat(`ip:${ip}`, Date.now(), IP_LIMIT)) return limited("Too many requests from this network. Wait a few minutes and try again.");
   if (!allowChat(sid)) return limited("Too many requests from this session. Wait a few minutes and try again.");
-  if (!allowGlobal()) return limited("This demo is receiving a lot of traffic. Wait a few minutes, or use the guided demo.", 503, "busy");
+  if (!allowGlobal()) return limited("Atlas is receiving a lot of traffic. Wait a few minutes, or try a scripted scenario.", 503, "busy");
   const release = acquireSlot();
-  if (!release) return limited("This demo is busy right now. Try again in a moment.", 503, "busy");
+  if (!release) return limited("Atlas is busy right now. Try again in a moment.", 503, "busy");
 
   const policy = policyFor(security);
   setAuditStdout(process.env.ATLAS_AUDIT_STDOUT === "1");
@@ -85,7 +85,7 @@ export async function POST(req: Request) {
           emit({
             type: "model",
             engine: demo ? "scripted" : "deterministic",
-            label: demo ? "Scripted demo scenario (deterministic)" : secretsAsk ? "Built-in assistant (credential and configuration requests never reach the model)" : "Built-in assistant (no language model configured)",
+            label: demo ? "Scripted scenario (deterministic)" : secretsAsk ? "Built-in assistant (credential and configuration requests never reach the model)" : "Built-in assistant (no language model configured)",
             note: demo ? "Reproducible synthetic scenario; no language model is used." : secretsAsk ? "This request was answered without calling any model." : config.ok ? undefined : config.message,
           });
           await runAgent({ message, policy, emit, signal: req.signal, ctx });

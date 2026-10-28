@@ -74,7 +74,7 @@ describe("walkthrough panel", () => {
     const panel = wt();
     expect(panel.textContent).toMatch(/Security was ON/);
     expect(stepButton(/You asked/)).toBeTruthy();
-    expect(stepButton(/Scripted demo scenario/)).toBeTruthy();
+    expect(stepButton(/Scripted scenario/)).toBeTruthy();
     const blocked = stepButton(/Fetch updates.*proj-lighthouse/);
     expect(blocked.getAttribute("aria-current")).toBe("step");
     const detail = within(panel).getByRole("region", { name: "Step details" });
@@ -216,7 +216,7 @@ describe("replies say where they came from", () => {
     await openDemo(user);
     await runStage(user, "A");
     expect(lastAssistant().querySelector(".src-tag")!.getAttribute("data-engine")).toBe("scripted");
-    expect(lastAssistant().querySelector(".src-tag")!.textContent).toMatch(/Scripted demo scenario · no language model/);
+    expect(lastAssistant().querySelector(".src-tag")!.textContent).toMatch(/Scripted scenario · no language model/);
     await user.click(screen.getByRole("button", { name: /Back to chat/ }));
     await user.type(screen.getByLabelText("Message"), "Tell me a joke");
     await user.keyboard("{Enter}");

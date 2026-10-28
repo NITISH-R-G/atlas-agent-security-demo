@@ -26,13 +26,13 @@ One record per decision: call id, tool, target, decision, layer, source (scripte
 
 <details><summary>Test evidence</summary>
 
-355 tests pass and 11 live-provider tests are skipped (skipped is not passed); TypeScript, ESLint and the production build are clean. Hosted checks: a live Groq reply with a denied `read_document`; scripted scenarios A to D; approve, deny and cross-session ticket checks (6 of 6 approvals worked across serverless requests with a ticket, 4 of 4 failed without one); layouts at 360x800, 390x844, 768x1024, 1024x768 and 1440x900 with no horizontal overflow. More detail: [PRESENTATION_CONTEXT.md](PRESENTATION_CONTEXT.md).
+402 tests pass and 11 live-provider tests are skipped (skipped is not passed); TypeScript, ESLint and the production build are clean. Hosted checks: a live Groq reply with a denied `read_document`; scripted scenarios A to D; approve, deny and cross-session ticket checks (6 of 6 approvals worked across serverless requests with a ticket, 4 of 4 failed without one); layouts at 360x800, 390x844, 768x1024, 1024x768 and 1440x900 with no horizontal overflow. More detail: [PRESENTATION_CONTEXT.md](PRESENTATION_CONTEXT.md).
 
 </details>
 
 <details><summary>Limitations</summary>
 
-- The Security switch is a demo setting, not authentication; the session is an anonymous cookie.
+- The Security switch is a scenario setting, not authentication; the session is an anonymous cookie.
 - Injection detection is heuristic; authorization never depends on it.
 - Serverless: single use, audit and rate limits are per instance; a replayed ticket can repeat a simulated send.
 - Groq 429 and timeout behaviour is unit tested, not verified on the hosted site.

@@ -1,7 +1,7 @@
 /**
  * Anonymous browser sessions. The server mints an unguessable id and sets it in an HttpOnly, SameSite=Strict cookie; it is
  * used only to bind approvals and rate limits to the browser that created them. It is NOT authentication: Atlas has no
- * users, and the Security switch remains a demo setting.
+ * users, and the Security switch remains a scenario setting.
  */
 const COOKIE = "atlas_sid";
 const SID = /^[a-f0-9]{32}$/;
